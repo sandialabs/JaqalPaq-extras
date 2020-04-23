@@ -17,7 +17,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'Jaqal-PUP'
+project = 'Jaqal-pup Extras'
 copyright = '2019, Sandia National Laboratories'
 author = 'B. C. A. Morrison'
 
