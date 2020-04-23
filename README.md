@@ -1,24 +1,20 @@
-# Jaqal Programming Utilities Project (Jaqal-PUP)
-This is the part of QSCOUT's software stack that fits above the Jaqal level. Everything here should eventually output Jaqal. This is the place for compilation, compatibility, scheduling, and so forth.
-Key components that we should provide:
-* One or more higher-level internal representations. (Possibly one scheduled and one unscheduled?)
-* The ability to unambiguously output that internal representation to Jaqal.
-* The ability to automatically schedule gates in an efficient (but not necessarily optimal) manner given an unscheduled program.
-* The ability to decompose arbitrary unitary operations into native ion-trap gates.
-* The ability to convert the data structures used by many other quantum software toolchains to our internal representation. Ideally this will include:
+# Jaqal Programming Utilities Project (Jaqal-pup) Extras
+This repository contains extensions to the Jaqal-pup that may be useful for 
+users.  Support is provided on a "best effort" basis, and quality cannot be 
+guaranteed.  The primary content is compatibility with other Quantum 
+programming toolsets, including transpiling.  In particular, we include
+* The ability to automatically schedule gates in an efficient (but not 
+  necessarily optimal) manner given an unscheduled program.
+* The ability to decompose arbitrary unitary operations into native ion-trap 
+  gates.
+* The ability to convert the data structures used by many other quantum 
+  software toolchains to our internal representation. Ideally this will 
+  include:
     * IBM's Qiskit/OpenQASM
     * Rigetti's Quil/pyquil/quilc
     * Google's Cirq
     * Microsoft's Q#
     * ETH Zurich's ProjectQ
     * CQC's t|ket>
-* Extensions to some or all of the above toolchains to properly support ion-based quantum computation, as needed.
-
-To make the software stack as modular as possible, and incidentally also decrease the risk of circular dependencies, we should follow the following philosophy of dependencies:
-* Any file at the top-level of the module should depend on only other files at the top-level.
-* Any file in the `jaqal.core` submodule can depend on top-level files and other files in `jaqal.core`.
-* Any file in another submodule can depend on top-level files, files from `jaqal.core`, and other files in the same submodule.
-* Each submodule should function correctly even if every submodule other than that one and `jaqal.core` were removed.
-* External dependencies may be required by the `jaqal` package as a whole, or be required by only a single submodule.
-For example, each external toolchain's Python API, if one exists, should be required only by the compatibility module for that toolchain; but `numpy` is a reasonable requirement for the package as a whole.
-If an external toolchain's Python API is missing, the function of the rest of the software stack should be unaffected.
+* Extensions to some or all of the above toolchains to properly support 
+  ion-based quantum computation, as needed.
