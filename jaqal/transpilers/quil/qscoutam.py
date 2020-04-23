@@ -1,6 +1,6 @@
 from pyquil.api import QAM
 
-from jaqalpup import QSCOUTError
+from jaqal import QSCOUTError
 
 class QSCOUTAM(QAM):
 	"""

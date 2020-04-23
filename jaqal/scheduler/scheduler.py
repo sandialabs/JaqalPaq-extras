@@ -1,5 +1,5 @@
-from jaqalpup.core import BlockStatement, LoopStatement, GateStatement, QUBIT_TYPE
-from jaqalpup import QSCOUTError
+from jaqal.core import BlockStatement, LoopStatement, GateStatement, QUBIT_TYPE
+from jaqal import QSCOUTError
 
 def schedule_circuit(circ):
 	"""
