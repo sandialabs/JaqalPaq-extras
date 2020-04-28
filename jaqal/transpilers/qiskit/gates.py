@@ -21,8 +21,9 @@ from qiskit.extensions.standard.rz import RZGate
 from qiskit.extensions.standard.rxx import RXXGate
 from qiskit.qasm import pi
 
+
 class MSGate(Gate):
-	"""
+    """
 	The two-parameter Mølmer-Sørensen gate, as implemented on QSCOUT hardware.
 	Note that this is *not* equivalent to Qiskit's MSGate. It's equivalent to ::
 	
@@ -49,11 +50,12 @@ class MSGate(Gate):
 	:param label: What to label the gate on, e.g., circuit diagrams.
 	:type label: str or None
 	"""
-	def __init__(self, theta, phi, label=None):
-		super().__init__("ms2", 2, [theta, phi], label=label)
-	
-	def _define(self):
-		"""
+
+    def __init__(self, theta, phi, label=None):
+        super().__init__("ms2", 2, [theta, phi], label=label)
+
+    def _define(self):
+        """
 		gate ms2(theta, phi) a,b
 		{
 		rz(phi) a;
@@ -68,100 +70,114 @@ class MSGate(Gate):
 		rz(-phi) b;
 		}
 		"""
-		definition = []
-		q = QuantumRegister(2, "q")
-		theta, phi = tuple(self.params)
-# 		rule = [
-# 			(U3Gate(0, 0, phi), [q[0]], []),
-# 			(U3Gate(0, 0, phi+pi/2), [q[1]], []),
-# 			(CnotGate(), [q[1], q[0]], []),
-# 			(U3Gate(0, 0, -pi/2), [q[0]], []),
-# 			(U3Gate(theta+pi/2,0,0), [q[1]], []),
-# 			(CnotGate(), [q[0], q[1]], []),
-# 			(U3Gate(-pi/2,0,0), [q[1]], []),
-# 			(CnotGate(), [q[1], q[0]], []),
-# 			(U3Gate(0, 0, -phi-pi/2), [q[0]], []),
-# 			(U3Gate(0, 0, -phi), [q[1]], []),
-# 		]
-		rule = [
-			(U3Gate(0, 0, phi), [q[0]], []),
-			(U3Gate(0, 0, phi), [q[1]], []),
-			(RXXGate(theta), [q[0], q[1]], []),
-			(U3Gate(0, 0, -phi), [q[0]], []),
-			(U3Gate(0, 0, -phi), [q[1]], []),			
-		]
-		for inst in rule:
-			definition.append(inst)
-		self.definition = definition
+        definition = []
+        q = QuantumRegister(2, "q")
+        theta, phi = tuple(self.params)
+        # 		rule = [
+        # 			(U3Gate(0, 0, phi), [q[0]], []),
+        # 			(U3Gate(0, 0, phi+pi/2), [q[1]], []),
+        # 			(CnotGate(), [q[1], q[0]], []),
+        # 			(U3Gate(0, 0, -pi/2), [q[0]], []),
+        # 			(U3Gate(theta+pi/2,0,0), [q[1]], []),
+        # 			(CnotGate(), [q[0], q[1]], []),
+        # 			(U3Gate(-pi/2,0,0), [q[1]], []),
+        # 			(CnotGate(), [q[1], q[0]], []),
+        # 			(U3Gate(0, 0, -phi-pi/2), [q[0]], []),
+        # 			(U3Gate(0, 0, -phi), [q[1]], []),
+        # 		]
+        rule = [
+            (U3Gate(0, 0, phi), [q[0]], []),
+            (U3Gate(0, 0, phi), [q[1]], []),
+            (RXXGate(theta), [q[0], q[1]], []),
+            (U3Gate(0, 0, -phi), [q[0]], []),
+            (U3Gate(0, 0, -phi), [q[1]], []),
+        ]
+        for inst in rule:
+            definition.append(inst)
+        self.definition = definition
+
 
 def ms2(self, theta, phi, a, b):
-	return self.append(MSGate(theta, phi), [a, b], [])
+    return self.append(MSGate(theta, phi), [a, b], [])
+
+
 QuantumCircuit.ms2 = ms2
 
+
 class SXGate(Gate):
-	"""
+    """
 	The `sqrt(X)` gate, as implemented on QSCOUT hardware. It's equivalent to a `pi/2`
 	rotation around the X-axis on the Bloch sphere.
 	
 	:param label: What to label the gate on, e.g., circuit diagrams.
 	:type label: str or None
 	"""
-	def __init__(self, label=None):
-		super().__init__("sx", 1, [], label=label)
-	
-	def _define(self):
-		"""
+
+    def __init__(self, label=None):
+        super().__init__("sx", 1, [], label=label)
+
+    def _define(self):
+        """
 		gate sx a
 		{
 		rx(pi/2) a;
 		}
 		"""
-		definition = []
-		q = QuantumRegister(1, "q")
-		rule = [
-			(RXGate(pi/2), [q[0]], []),
-		]
-		for inst in rule:
-			definition.append(inst)
-		self.definition = definition
+        definition = []
+        q = QuantumRegister(1, "q")
+        rule = [
+            (RXGate(pi / 2), [q[0]], []),
+        ]
+        for inst in rule:
+            definition.append(inst)
+        self.definition = definition
+
 
 def sx(self, q):
-	return self.append(SXGate(), [q], [])
+    return self.append(SXGate(), [q], [])
+
+
 QuantumCircuit.sx = sx
 
+
 class SYGate(Gate):
-	"""
+    """
 	The `sqrt(Y)` gate, as implemented on QSCOUT hardware. It's equivalent to a `pi/2`
 	rotation around the Y-axis on the Bloch sphere.
 	
 	:param label: What to label the gate on, e.g., circuit diagrams.
 	:type label: str or None
 	"""
-	def __init__(self, label=None):
-		super().__init__("sy", 1, [], label=label)
-	
-	def _define(self):
-		"""
+
+    def __init__(self, label=None):
+        super().__init__("sy", 1, [], label=label)
+
+    def _define(self):
+        """
 		gate sy a
 		{
 		ry(pi/2) a;
 		}
 		"""
-		definition = []
-		q = QuantumRegister(1, "q")
-		rule = [
-			(RYGate(pi/2), [q[0]], []),
-		]
-		for inst in rule:
-			definition.append(inst)
-		self.definition = definition
+        definition = []
+        q = QuantumRegister(1, "q")
+        rule = [
+            (RYGate(pi / 2), [q[0]], []),
+        ]
+        for inst in rule:
+            definition.append(inst)
+        self.definition = definition
+
 
 def sy(self, q):
-	return self.append(SYGate(), [q], [])
+    return self.append(SYGate(), [q], [])
+
+
 QuantumCircuit.sy = sy
 
+
 class RGate(Gate):
-	"""
+    """
 	A single-qubit gate representing arbitrary rotation around an axis in the X-Y plane,
 	as implemented on QSCOUT hardware. Note that this is essentially a different
 	parametrization of Qiskit's U2 gate. It's equivalent to the OpenQASM sequence ::
@@ -178,11 +194,12 @@ class RGate(Gate):
 	:param label: What to label the gate on, e.g., circuit diagrams.
 	:type label: str or None
 	"""
-	def __init__(self, axis_angle, rotation_angle, label=None):
-		super().__init__("r", 1, [axis_angle, rotation_angle], label=label)
-	
-	def _define(self):
-		"""
+
+    def __init__(self, axis_angle, rotation_angle, label=None):
+        super().__init__("r", 1, [axis_angle, rotation_angle], label=label)
+
+    def _define(self):
+        """
 		gate r(theta, phi) a
 		{
 		rz(-theta) a;
@@ -190,18 +207,21 @@ class RGate(Gate):
 		rz(theta) a;
 		}
 		"""
-		definition = []
-		q = QuantumRegister(1, "q")
-		theta, phi = tuple(self.params)
-		rule = [
-			(RZGate(-theta), [q[0]], []),
-			(RXGate(phi), [q[0]], []),
-			(RZGate(theta), [q[0]], []),
-		]
-		for inst in rule:
-			definition.append(inst)
-		self.definition = definition
+        definition = []
+        q = QuantumRegister(1, "q")
+        theta, phi = tuple(self.params)
+        rule = [
+            (RZGate(-theta), [q[0]], []),
+            (RXGate(phi), [q[0]], []),
+            (RZGate(theta), [q[0]], []),
+        ]
+        for inst in rule:
+            definition.append(inst)
+        self.definition = definition
+
 
 def r(self, theta, phi, q):
-	return self.append(RGate(theta, phi), [q], [])
+    return self.append(RGate(theta, phi), [q], [])
+
+
 QuantumCircuit.r = r
