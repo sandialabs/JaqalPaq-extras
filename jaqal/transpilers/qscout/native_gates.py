@@ -5,14 +5,14 @@ from jaqalpup.core import GateDefinition, Parameter, QUBIT_TYPE, FLOAT_TYPE
 
 def R_unitary(theta, phi):
     """
-	Generates the unitary matrix that describes the QSCOUT native R gate, which performs
-	an arbitrary rotation around an axis in the X-Y plane.
+    Generates the unitary matrix that describes the QSCOUT native R gate, which performs
+    an arbitrary rotation around an axis in the X-Y plane.
 
-	:param float theta: The angle that sets the planar axis to rotate around.
-	:param float phi: The angle by which the gate rotates the state.
-	:returns: The unitary gate matrix.
-	:rtype: numpy.array
-	"""
+    :param float theta: The angle that sets the planar axis to rotate around.
+    :param float phi: The angle by which the gate rotates the state.
+    :returns: The unitary gate matrix.
+    :rtype: numpy.array
+    """
     return np.array(
         [
             [
@@ -29,16 +29,16 @@ def R_unitary(theta, phi):
 
 def MS_unitary(theta, phi):
     """
-	Generates the unitary matrix that describes the QSCOUT native Mølmer-Sørensen gate.
-	This matrix is equivalent to ::
+    Generates the unitary matrix that describes the QSCOUT native Mølmer-Sørensen gate.
+    This matrix is equivalent to ::
 
-		exp(-i theta/2 (cos(phi) XI + sin(phi) YI) (cos(phi) IX + sin(phi) IY))
+        exp(-i theta/2 (cos(phi) XI + sin(phi) YI) (cos(phi) IX + sin(phi) IY))
 
-	:param float theta: The angle by which the gate rotates the state.
-	:param float phi: The phase angle determining the mix of XX and YY rotation.
-	:returns: The unitary gate matrix.
-	:rtype: numpy.array
-	"""
+    :param float theta: The angle by which the gate rotates the state.
+    :param float phi: The phase angle determining the mix of XX and YY rotation.
+    :returns: The unitary gate matrix.
+    :rtype: numpy.array
+    """
     return np.array(
         [
             [

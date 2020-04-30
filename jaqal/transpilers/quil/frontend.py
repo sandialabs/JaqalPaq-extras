@@ -19,15 +19,15 @@ def get_ion_qam():
 
 def get_ion_qc(num_qubits):
     """
-	Constructs a quantum computer object that represents the QSCOUT hardware.
-	Unlike the builtin Quil counterparts, it can't run quantum programs, but it can still
-	be used as a compilation target and thus used to generate Jaqal code (which can then
-	be submitted to be run on the actual QSCOUT device).
-	
-	:param int num_qubits: How many qubits in the trap will be used.
-	:returns: The quantum computer object for compilation.
-	:rtype: pyquil.api.QuantumComputer
-	"""
+    Constructs a quantum computer object that represents the QSCOUT hardware.
+    Unlike the builtin Quil counterparts, it can't run quantum programs, but it can still
+    be used as a compilation target and thus used to generate Jaqal code (which can then
+    be submitted to be run on the actual QSCOUT device).
+
+    :param int num_qubits: How many qubits in the trap will be used.
+    :returns: The quantum computer object for compilation.
+    :rtype: pyquil.api.QuantumComputer
+    """
     device = get_ion_device(num_qubits)
     return QuantumComputer(
         name="QSCOUT-%d" % num_qubits,
@@ -39,12 +39,12 @@ def get_ion_qc(num_qubits):
 
 def patch_simulator():
     """
-	Modifies pyquil's simulator to support trapped-ion gates. Run before attempting to
-	simulate any circuit that includes the QSCOUT native gates.
-	
-	.. warning::
-		The simulator will give an error if QSCOUT native gates are passed to it before calling this function!
-	"""
+    Modifies pyquil's simulator to support trapped-ion gates. Run before attempting to
+    simulate any circuit that includes the QSCOUT native gates.
+
+    .. warning::
+        The simulator will give an error if QSCOUT native gates are passed to it before calling this function!
+    """
     dkt = {}
     for gate in NATIVE_GATES:
         if gate._ideal_gate is None:

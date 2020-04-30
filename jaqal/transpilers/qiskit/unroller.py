@@ -30,9 +30,9 @@ from .gates import MSGate, SXGate, SYGate, RGate
 
 class IonUnroller(TransformationPass):
     """
-	A Qiskit transpiler pass that attempts to map an arbitrary circuit onto the native
-	gates of the QSCOUT hardware, usually to prepare for conversion to Jaqal.
-	"""
+    A Qiskit transpiler pass that attempts to map an arbitrary circuit onto the native
+    gates of the QSCOUT hardware, usually to prepare for conversion to Jaqal.
+    """
 
     def __init__(self):
         super().__init__()
@@ -95,13 +95,13 @@ class IonUnroller(TransformationPass):
 
     def run(self, dag):
         """
-		Apply this transpiler pass to a circuit in directed acyclic graph representation.
-		
-		:param qiskit.dagcircuit.DAGCircuit dag: The circuit to transpile.
-		:returns: The transpiled circuit.
-		:rtype: qiskit.dagcircuit.DAGCircuit
-		:raises qiskit.exceptions.QiskitError: If the circuit contains a parametrized non-basis gate, or contains a gate that cannot be unrolled.
-		"""
+        Apply this transpiler pass to a circuit in directed acyclic graph representation.
+
+        :param qiskit.dagcircuit.DAGCircuit dag: The circuit to transpile.
+        :returns: The transpiled circuit.
+        :rtype: qiskit.dagcircuit.DAGCircuit
+        :raises qiskit.exceptions.QiskitError: If the circuit contains a parametrized non-basis gate, or contains a gate that cannot be unrolled.
+        """
         # Walk through the DAG and expand each non-basis node
         for node in dag.op_nodes():
             basic_insts = ["measure", "reset", "barrier", "snapshot"]

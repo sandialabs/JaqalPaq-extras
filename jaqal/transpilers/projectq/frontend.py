@@ -105,10 +105,10 @@ class JaqalBackend(BasicEngine):
 
     def _mapped_qubit_id(self, qubit):
         """
-		Converts a qubit from a logical to a mapped qubit if there is a mapper.
-		Args:
-			qubit (projectq.types.Qubit): Logical quantum bit
-		"""
+        Converts a qubit from a logical to a mapped qubit if there is a mapper.
+        Args:
+            qubit (projectq.types.Qubit): Logical quantum bit
+        """
         mapper = self.main_engine.mapper
         if mapper is not None:
             if qubit.id not in mapper.current_mapping:
