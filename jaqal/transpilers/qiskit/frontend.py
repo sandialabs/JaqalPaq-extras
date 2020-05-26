@@ -1,8 +1,8 @@
-from jaqal.core import ScheduledCircuit, GateStatement
+from jaqalpaq.core import ScheduledCircuit, GateStatement
 
 # from qscoutlib import MSGate, QasmGate, IonUnroller
 from qiskit.converters import dag_to_circuit
-from jaqal import QSCOUTError
+from jaqalpaq import QSCOUTError
 
 # from sympy.core.evalf import N
 import numpy as np

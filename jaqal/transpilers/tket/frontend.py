@@ -1,10 +1,10 @@
 from pytket.circuit import OpType
 
-from jaqal.core import ScheduledCircuit, BlockStatement
+from jaqalpaq.core import ScheduledCircuit, BlockStatement
 
 import numpy as np
 
-from jaqal import QSCOUTError
+from jaqalpaq import QSCOUTError
 
 TKET_NAMES = {
     OpType.PhasedX: lambda q, alpha, beta: ("R", q, alpha, -beta),

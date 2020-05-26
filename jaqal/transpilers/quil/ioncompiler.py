@@ -2,8 +2,8 @@ from pyquil.api._qac import AbstractCompiler
 from typing import Optional
 from pyquil.quil import Program, Gate
 from pyquil.quilbase import Measurement, ResetQubit, Reset
-from jaqal.core import ScheduledCircuit
-from jaqal import QSCOUTError
+from jaqalpaq.core import ScheduledCircuit
+from jaqalpaq import QSCOUTError
 import numpy as np
 
 QUIL_NAMES = {

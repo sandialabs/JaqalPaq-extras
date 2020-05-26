@@ -1,6 +1,6 @@
-from jaqal.core.circuit import ScheduledCircuit
-from jaqal.core.gatedef import NATIVE_GATES
-from jaqal import QSCOUTError
+from jaqalpaq.core.circuit import ScheduledCircuit
+from jaqalpaq.core.gatedef import NATIVE_GATES
+from jaqalpaq import QSCOUTError
 from cirq import (
     XXPowGate,
     XPowGate,
