@@ -25,7 +25,7 @@ def qscout_circuit_from_dag_circuit(dag):
     See :func:`qscout_circuit_from_qiskit_circuit` for details.
 
     :param qiskit.dagcircuit.DAGCircuit dag: The directed acyclic graph circuit to convert.
-    :returns: The same quantum circuit, converted to Jaqal-PUP.
+    :returns: The same quantum circuit, converted to JaqalPaq.
     :rtype: qscout.core.ScheduledCircuit
     """
     return qscout_circuit_from_qiskit_circuit(dag_to_circuit(dag))
@@ -58,7 +58,7 @@ def qscout_circuit_from_qiskit_circuit(circuit, names=None, native_gates=None):
     :type names: dict or None
     :param native_gates: The native gate set to target. If None, target the QSCOUT native gates.
     :type native_gates: dict or None
-    :returns: The same quantum circuit, converted to Jaqal-PUP.
+    :returns: The same quantum circuit, converted to JaqalPaq.
     :rtype: qscout.core.ScheduledCircuit
     :raises QSCOUTError: If any instruction acts on a qubit from a register other than the circuit's qregs.
     :raises QSCOUTError: If the circuit includes a snapshot instruction.

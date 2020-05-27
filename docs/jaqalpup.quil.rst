@@ -1,7 +1,7 @@
-jaqalpup.quil package
+jaqalpaq.quil package
 =====================
 
-.. automodule:: jaqalpup.quil
+.. automodule:: jaqalpaq.quil
    :members:
    :undoc-members:
    :show-inheritance:

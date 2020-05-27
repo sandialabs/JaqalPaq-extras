@@ -96,7 +96,7 @@ class JaqalBackend(BasicEngine):
         for cmd in command_list:
             if cmd.gate == FlushGate():
                 if self.outfile is not None:
-                    from jaqalpup.generator import generate_jaqal_program
+                    from jaqalpaq.generator import generate_jaqal_program
 
                     with open(self.outfile, "w+") as f:
                         f.write(generate_jaqal_program(self.circuit))

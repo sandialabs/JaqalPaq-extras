@@ -68,7 +68,7 @@ class IonCompiler(AbstractCompiler):
         gate will be appended to it.
 
         :param pyquil.quil.Program nq_program: The program to compile.
-        :returns: The same quantum program, converted to Jaqal-PUP.
+        :returns: The same quantum program, converted to JaqalPaq.
         :rtype: qscout.core.ScheduledCircuit
         :raises QSCOUTError: If the program includes a non-gate instruction other than resets or measurements.
         :raises QSCOUTError: If the user tries to measure or reset only some of the qubits, rather than all of them.

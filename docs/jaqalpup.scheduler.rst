@@ -1,7 +1,7 @@
-jaqalpup.scheduler package
+jaqalpaq.scheduler package
 ==========================
 
-.. automodule:: jaqalpup.scheduler
+.. automodule:: jaqalpaq.scheduler
    :members:
    :undoc-members:
    :show-inheritance:

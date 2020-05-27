@@ -1,5 +1,5 @@
 # Python Jaqal Programming Package (JaqalPaq) Extras
-This repository contains extensions to the Jaqal-pup that may be useful for
+This repository contains extensions to JaqalPaq that may be useful for
 users.  Support is provided on a "best effort" basis, and quality cannot be
 guaranteed.  The primary content is compatibility with other Quantum
 programming toolsets, including transpiling.  In particular, we include

@@ -29,7 +29,7 @@ setup(
         "jaqalpaq.transpilers.tket",
     ],
     package_dir={"": "."},
-    install_requires=["Jaqal-pup"],
+    install_requires=["JaqalPaq"],
     extras_requires={"tests": ["pytest"], "docs": ["sphinx"],},
     python_requires=">=3.7",
     platforms=["any"],
