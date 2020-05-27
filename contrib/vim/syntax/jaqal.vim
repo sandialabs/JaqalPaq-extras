@@ -10,7 +10,7 @@ set mps+=<:>
 " matching occurences are then added to syntaxClass. This will then highlight
 " subsequent references to a previous variable with its appropriate type.
 " It seems this functionality doesn't exist natively in vimscript.
-function GetInstances(regexstr, syntaxClass)
+function! GetInstances(regexstr, syntaxClass)
     try
         silent exe "vimgrep /" . a:regexstr . "/j %"
     catch /^Vim\%((\a\+)\)\=:E480/ " no match
@@ -23,7 +23,7 @@ endfunction
 " Use gate pulse file path information and valid gate names to contruct tag file
 " Note: Tag file does not appear to work with gd or gD, but works with
 " <Ctrl>-] as well as <Ctrl>-t to jump back.
-function GenerateTag(input, path)
+function! GenerateTag(input, path)
   return a:input . "\t" . a:path . ".py" . "\t" . "/def gate_" . a:input
 endfunction
 
