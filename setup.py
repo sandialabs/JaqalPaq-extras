@@ -31,7 +31,7 @@ setup(
     package_dir={"": "."},
     install_requires=["JaqalPaq"],
     extras_requires={"tests": ["pytest"], "docs": ["sphinx"],},
-    python_requires=">=3.7",
+    python_requires=">=3.6.5",
     platforms=["any"],
     url="https://qscout.sandia.gov",
     classifiers=[
