@@ -1,5 +1,5 @@
 from jaqalpaq.core import BlockStatement, LoopStatement, GateStatement, QUBIT_TYPE
-from jaqalpaq import QSCOUTError
+from jaqalpaq import JaqalError
 
 
 def schedule_circuit(circ):
@@ -105,7 +105,7 @@ def schedule_instr(circ, instr, target, freeze_timestamps, after=-1):
         defrost = len(target)  # Any qubit used in the loop shouldn't be touched
         target.append(instr)  # Until after the loop finishes
     else:
-        raise QSCOUTError("Can't schedule instruction %s." % str(instr))
+        raise JaqalError("Can't schedule instruction %s." % str(instr))
     for reg in used_qubits:
         for idx in used_qubits[reg]:
             freeze_timestamps[reg][idx] = defrost

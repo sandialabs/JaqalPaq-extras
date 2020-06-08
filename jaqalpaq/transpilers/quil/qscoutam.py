@@ -1,6 +1,6 @@
 from pyquil.api import QAM
 
-from jaqalpaq import QSCOUTError
+from jaqalpaq import JaqalError
 
 
 class QSCOUTAM(QAM):
@@ -15,9 +15,9 @@ class QSCOUTAM(QAM):
         """
         Does not load a Jaqal program onto an abstraction of the QSCOUT hardware.
 
-        :raises QSCOUTError: Because the Quil API should not be used to try to execute programs on QSCOUT.
+        :raises JaqalError: Because the Quil API should not be used to try to execute programs on QSCOUT.
         """
-        raise QSCOUTError(
+        raise JaqalError(
             "QSCOUT cannot run programs through the Quil API. Generate a Jaqal file with compile() and submit it directly to Dr. Peter Maunz."
         )
 
@@ -25,8 +25,8 @@ class QSCOUTAM(QAM):
         """
         Does not run a previously loaded Jaqal program on an abstraction of the QSCOUT hardware.
 
-        :raises QSCOUTError: Because the Quil API should not be used to try to execute programs on QSCOUT.
+        :raises JaqalError: Because the Quil API should not be used to try to execute programs on QSCOUT.
         """
-        raise QSCOUTError(
+        raise JaqalError(
             "QSCOUT cannot run programs through the Quil API. Generate a Jaqal file with compile() and submit it directly to Dr. Peter Maunz."
         )

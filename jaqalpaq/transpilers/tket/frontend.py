@@ -4,7 +4,7 @@ from jaqalpaq.core import ScheduledCircuit, BlockStatement
 
 import numpy as np
 
-from jaqalpaq import QSCOUTError
+from jaqalpaq import JaqalError
 
 TKET_NAMES = {
     OpType.PhasedX: lambda q, alpha, beta: ("R", q, alpha, -beta),
@@ -58,13 +58,13 @@ def convert_command(command, qsc, block, names, measure_accumulator, n, remaps=N
             if target.reg_name in qsc.registers:
                 measure_accumulator.add(target.resolve_qubit(target.index)[1])
             else:
-                raise QSCOUTError("Register %s invalid!" % target.register.name)
+                raise JaqalError("Register %s invalid!" % target.register.name)
             if len(measure_accumulator) == n:
                 block.append(qsc.build_gate("measure_all"))
                 measure_accumulator = set()
             return block, measure_accumulator
         else:
-            raise QSCOUTError(
+            raise JaqalError(
                 "Cannot measure only qubits %s and not whole register."
                 % measure_accumulator
             )
@@ -113,7 +113,7 @@ def convert_command(command, qsc, block, names, measure_accumulator, n, remaps=N
             )
         )
     else:
-        raise QSCOUTError(
+        raise JaqalError(
             "Instruction %s not available on trapped ion hardware; try unrolling first."
             % op_type
         )

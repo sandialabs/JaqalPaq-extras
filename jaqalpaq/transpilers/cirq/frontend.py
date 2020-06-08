@@ -1,6 +1,6 @@
 from jaqalpaq.core.circuit import ScheduledCircuit
 from jaqalpaq.core.gatedef import NATIVE_GATES
-from jaqalpaq import QSCOUTError
+from jaqalpaq import JaqalError
 from cirq import (
     XXPowGate,
     XPowGate,
@@ -28,7 +28,7 @@ def qscout_circuit_from_cirq_circuit(ccirc, names=None, native_gates=None):
     :param cirq.Circuit ccirc: The Circuit to convert.
     :returns: The same quantum circuit, converted to JaqalPaq.
     :rtype: ScheduledCircuit
-    :raises QSCOUTError: if the input contains any instructions other than ``cirq.XXPowGate``, ``cirq.XPowGate``, ``cirq.YPowGate``, ``cirq.ZPowGate``, or ``cirq.PhasedXPowGate``.
+    :raises JaqalError: if the input contains any instructions other than ``cirq.XXPowGate``, ``cirq.XPowGate``, ``cirq.YPowGate``, ``cirq.ZPowGate``, or ``cirq.PhasedXPowGate``.
     """  # TODO: Document this better.
     qcirc = ScheduledCircuit(native_gates=native_gates)
     if names is None:
@@ -84,9 +84,9 @@ def qscout_circuit_from_cirq_circuit(ccirc, names=None, native_gates=None):
                             )
                         )
                 else:
-                    raise QSCOUTError("Convert circuit to ion gates before compiling.")
+                    raise JaqalError("Convert circuit to ion gates before compiling.")
             else:
-                raise QSCOUTError("Cannot compile operation %s." % op)
+                raise JaqalError("Cannot compile operation %s." % op)
     if (
         not need_prep
     ):  # If we just measured, or the circuit is empty, don't add a final measurement.

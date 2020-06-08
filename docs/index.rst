@@ -21,7 +21,7 @@ JaqalPaq currently consists of the :mod:`jaqalpaq` Python package, and its nine 
 * The :mod:`jaqalpaq.cirq`, :mod:`jaqalpaq.projectq`, :mod:`jaqalpaq.qiskit`, :mod:`jaqalpaq.quil`, and :mod:`jaqalpaq.tket` packages allow conversion between :mod:`jaqalpaq.core` objects and their counterparts in other popular quantum software development frameworks.
 
 Additionally, the top-level :mod:`jaqalpaq` package provides a few useful imports that don't fit
-within the scope of any of the above subpackages: the :exc:`jaqalpaq.QSCOUTError` class and a collection of :data:`RESERVED_WORDS`.
+within the scope of any of the above subpackages: the :exc:`jaqalpaq.JaqalError` class and a collection of :data:`RESERVED_WORDS`.
 
 
 Indices and tables

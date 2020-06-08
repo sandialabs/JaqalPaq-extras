@@ -20,7 +20,7 @@ from projectq.meta import get_control_count
 from projectq.types import WeakQubitRef
 
 from jaqalpaq.core import ScheduledCircuit
-from jaqalpaq import QSCOUTError
+from jaqalpaq import JaqalError
 
 import numpy as np
 
@@ -138,7 +138,7 @@ class JaqalBackend(BasicEngine):
         elif gate == Measure:
             qid = self._mapped_qubit_id(cmd.qubits[0][0])
             if qid in self.measure_accumulator:
-                raise QSCOUTError("Can't measure qubit %d twice!" % qid)
+                raise JaqalError("Can't measure qubit %d twice!" % qid)
             else:
                 self.measure_accumulator.add(qid)
                 if len(self.measure_accumulator) == len(self.circuit.registers["q"]):
@@ -150,7 +150,7 @@ class JaqalBackend(BasicEngine):
         elif type(gate) in one_qubit_gates:
             qid = self._mapped_qubit_id(cmd.qubits[0][0])
             if qid in self.measure_accumulator:
-                raise QSCOUTError("Can't do gates in the middle of measurement!")
+                raise JaqalError("Can't do gates in the middle of measurement!")
             else:
                 self._block.append(
                     self.circuit.build_gate(
@@ -162,7 +162,7 @@ class JaqalBackend(BasicEngine):
             qids = [self._mapped_qubit_id(qb[0]) for qb in cmd.qubits]
             for qid in qids:
                 if qid in self.measure_accumulator:
-                    raise QSCOUTError("Can't do gates in the middle of measurement!")
+                    raise JaqalError("Can't do gates in the middle of measurement!")
             self._block.append(
                 self.circuit.build_gate(
                     *self.two_qubit_gates[type(gate)](
@@ -172,4 +172,4 @@ class JaqalBackend(BasicEngine):
             )
 
         else:
-            raise QSCOUTError("Unknown instruction! %s" % gate)
+            raise JaqalError("Unknown instruction! %s" % gate)

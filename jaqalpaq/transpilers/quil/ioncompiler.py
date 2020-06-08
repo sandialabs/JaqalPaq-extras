@@ -3,7 +3,7 @@ from typing import Optional
 from pyquil.quil import Program, Gate
 from pyquil.quilbase import Measurement, ResetQubit, Reset
 from jaqalpaq.core import ScheduledCircuit
-from jaqalpaq import QSCOUTError
+from jaqalpaq import JaqalError
 import numpy as np
 
 QUIL_NAMES = {
@@ -70,13 +70,13 @@ class IonCompiler(AbstractCompiler):
         :param pyquil.quil.Program nq_program: The program to compile.
         :returns: The same quantum program, converted to JaqalPaq.
         :rtype: qscout.core.ScheduledCircuit
-        :raises QSCOUTError: If the program includes a non-gate instruction other than resets or measurements.
-        :raises QSCOUTError: If the user tries to measure or reset only some of the qubits, rather than all of them.
-        :raises QSCOUTError: If the program includes a gate not included in `names`.
+        :raises JaqalError: If the program includes a non-gate instruction other than resets or measurements.
+        :raises JaqalError: If the user tries to measure or reset only some of the qubits, rather than all of them.
+        :raises JaqalError: If the program includes a gate not included in `names`.
         """
         n = max(nq_program.get_qubits()) + 1
         if n > len(self._device.qubits()):
-            raise QSCOUTError(
+            raise JaqalError(
                 "Program uses more qubits (%d) than device supports (%d)."
                 % (n, len(self._device.qubits()))
             )
@@ -98,7 +98,7 @@ class IonCompiler(AbstractCompiler):
                         reset_accumulator = {}
                     continue
                 else:
-                    raise QSCOUTError(
+                    raise JaqalError(
                         "Cannot reset only qubits %s and not whole register."
                         % reset_accumulator
                     )
@@ -111,7 +111,7 @@ class IonCompiler(AbstractCompiler):
                         measure_accumulator = {}
                     continue
                 else:
-                    raise QSCOUTError(
+                    raise JaqalError(
                         "Cannot measure only qubits %s and not whole register."
                         % reset_accumulator
                     )
@@ -124,7 +124,7 @@ class IonCompiler(AbstractCompiler):
                         *[float(p) for p in instr.params]
                     )
                 else:
-                    raise QSCOUTError("Gate %s not in native gate set." % instr.name)
+                    raise JaqalError("Gate %s not in native gate set." % instr.name)
             elif isinstance(instr, Reset):
                 if len(qsc.body) > 1:
                     qsc.gate("prepare_all")
@@ -136,7 +136,7 @@ class IonCompiler(AbstractCompiler):
                     instr.qubit.index
                 }  # We ignore the classical register.
             else:
-                raise QSCOUTError("Instruction %s not supported." % instr.out())
+                raise JaqalError("Instruction %s not supported." % instr.out())
         if qsc.body[-1].name != "measure_all":
             qsc.gate("measure_all")
         return qsc
