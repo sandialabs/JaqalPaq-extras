@@ -24,11 +24,31 @@ CIRQ_NAMES = {
 
 def qscout_circuit_from_cirq_circuit(ccirc, names=None, native_gates=None):
     """Converts a Cirq Circuit object to a :class:`qscout.core.ScheduledCircuit`.
+    The circuit will be structured as a sequence of parallel blocks, one for each Cirq
+    Moment in the input.
+
+    Measurement are supported, but only if applied to every qubit in the circuit in the
+    same moment. If so, they will be mapped to a measure_all gate. If the measure_all gate
+    is not the last gate in the circuit, a prepare_all gate will be inserted after it.
+    Additionally, a prepare_all gate will be inserted before the first moment. If the
+    circuit does not end with a measurement, then a measure_all gate will be appended.
+
+    Circuits built on a line register will map each qubit to the qubit of the same index
+    on the hardware. This may leave some qubits unused. Otherwise, the qubits will be
+    mapped onto the hardware in the order given by ccirc.all_qubits().
 
     :param cirq.Circuit ccirc: The Circuit to convert.
+    :param names: A mapping from names of Qiskit gates to the corresponding native Jaqal gate names.
+        If omitted, maps ``cirq.XXPowGate``, ``cirq.XPowGate``, ``cirq.YPowGate``,
+        ``cirq.ZPowGate``, and ``cirq.PhasedXPowGate`` to their QSCOUT counterparts. The
+        ``cirq.ConvertToIonGates`` function will transpile a circuit into this basis.
+    :type names: dict or None
+    :param native_gates: The native gate set to target. If None, target the QSCOUT native gates.
+    :type native_gates: dict or None
     :returns: The same quantum circuit, converted to JaqalPaq.
     :rtype: ScheduledCircuit
     :raises QSCOUTError: if the input contains any instructions other than ``cirq.XXPowGate``, ``cirq.XPowGate``, ``cirq.YPowGate``, ``cirq.ZPowGate``, or ``cirq.PhasedXPowGate``.
+    :raises JaqalError: If the circuit includes a gate not included in `names`.
     """  # TODO: Document this better.
     qcirc = ScheduledCircuit(native_gates=native_gates)
     if names is None:
