@@ -1,6 +1,6 @@
 from jaqalpaq.core import ScheduledCircuit
 from ..qscout.native_gates import NATIVE_GATES
-from jaqalpaq import QSCOUTError
+from jaqalpaq import JaqalError
 import networkx as nx
 from pyquil.device import NxDevice
 from pyquil.api import QuantumComputer

@@ -2,7 +2,7 @@ from jaqalpaq.core import ScheduledCircuit, GateStatement
 
 # from qscoutlib import MSGate, QasmGate, IonUnroller
 from qiskit.converters import dag_to_circuit
-from jaqalpaq import QSCOUTError
+from jaqalpaq import JaqalError
 
 # from sympy.core.evalf import N
 import numpy as np
@@ -60,10 +60,10 @@ def qscout_circuit_from_qiskit_circuit(circuit, names=None, native_gates=None):
     :type native_gates: dict or None
     :returns: The same quantum circuit, converted to JaqalPaq.
     :rtype: qscout.core.ScheduledCircuit
-    :raises QSCOUTError: If any instruction acts on a qubit from a register other than the circuit's qregs.
-    :raises QSCOUTError: If the circuit includes a snapshot instruction.
-    :raises QSCOUTError: If the user tries to measure or reset only some of the qubits, rather than all of them.
-    :raises QSCOUTError: If the circuit includes a gate not included in `names`.
+    :raises JaqalError: If any instruction acts on a qubit from a register other than the circuit's qregs.
+    :raises JaqalError: If the circuit includes a snapshot instruction.
+    :raises JaqalError: If the user tries to measure or reset only some of the qubits, rather than all of them.
+    :raises JaqalError: If the circuit includes a gate not included in `names`.
     """
     n = sum([qreg.size for qreg in circuit.qregs])
     qsc = ScheduledCircuit(native_gates=native_gates)
@@ -90,13 +90,13 @@ def qscout_circuit_from_qiskit_circuit(circuit, names=None, native_gates=None):
                 if target.register.name in qsc.registers:
                     reset_accumulator.add(target.resolve_qubit(target.index)[1])
                 else:
-                    raise QSCOUTError("Register %s invalid!" % target.register.name)
+                    raise JaqalError("Register %s invalid!" % target.register.name)
                 if len(reset_accumulator) == n:
                     qsc.gate("prepare_all")
                     reset_accumulator = {}
                 continue
             else:
-                raise QSCOUTError(
+                raise JaqalError(
                     "Cannot reset only qubits %s and not whole register."
                     % reset_accumulator
                 )
@@ -107,13 +107,13 @@ def qscout_circuit_from_qiskit_circuit(circuit, names=None, native_gates=None):
                 if target.register.name in qsc.registers:
                     measure_accumulator.add(target.resolve_qubit(target.index)[1])
                 else:
-                    raise QSCOUTError("Register %s invalid!" % target.register.name)
+                    raise JaqalError("Register %s invalid!" % target.register.name)
                 if len(measure_accumulator) == n:
                     qsc.gate("measure_all")
                     measure_accumulator = {}
                 continue
             else:
-                raise QSCOUTError(
+                raise JaqalError(
                     "Cannot measure only qubits %s and not whole register."
                     % reset_accumulator
                 )
@@ -123,29 +123,27 @@ def qscout_circuit_from_qiskit_circuit(circuit, names=None, native_gates=None):
             if target.register.name in qsc.registers:
                 reset_accumulator = {target.resolve_qubit(target.index)[1]}
             else:
-                raise QSCOUTError("Register %s invalid!" % target.register.name)
+                raise JaqalError("Register %s invalid!" % target.register.name)
         elif instr[0].name == "reset":
             if len(qsc.body) > 1:
                 target = instr[1][0]
                 if target.register.name in qsc.registers:
                     reset_accumulator = {target.resolve_qubit(target.index)[1]}
                 else:
-                    raise QSCOUTError("Register %s invalid!" % target.register.name)
+                    raise JaqalError("Register %s invalid!" % target.register.name)
         elif instr[0].name == "barrier":
             block = qsc.block(
                 parallel=None
             )  # Use barriers to inform the scheduler, as explained above.
         elif instr[0].name == "snapshot":
-            raise QSCOUTError(
+            raise JaqalError(
                 "Physical hardware does not support snapshot instructions."
             )
         elif instr[0].name in names:
             targets = instr[1]
             for target in targets:
                 if target.register.name not in qsc.registers:
-                    raise QSCOUTError(
-                        "Gate register %s invalid!" % target.register.name
-                    )
+                    raise JaqalError("Gate register %s invalid!" % target.register.name)
             block.append(
                 qsc.build_gate(
                     names[instr[0].name],
@@ -157,7 +155,7 @@ def qscout_circuit_from_qiskit_circuit(circuit, names=None, native_gates=None):
                 )
             )
         else:
-            raise QSCOUTError(
+            raise JaqalError(
                 "Instruction %s not available on trapped ion hardware; try unrolling first."
                 % instr[0].name
             )
