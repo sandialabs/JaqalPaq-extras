@@ -95,7 +95,7 @@ class IonCompiler(AbstractCompiler):
                     reset_accumulator.add(instr.qubit.index)
                     if nq_program.get_qubits() <= reset_accumulator:
                         qsc.gate("prepare_all")
-                        reset_accumulator = {}
+                        reset_accumulator = set()
                     continue
                 else:
                     raise QSCOUTError(
@@ -108,12 +108,12 @@ class IonCompiler(AbstractCompiler):
                     measure_accumulator.add(instr.qubit.index)
                     if nq_program.get_qubits() <= measure_accumulator:
                         qsc.gate("measure_all")
-                        measure_accumulator = {}
+                        measure_accumulator = set()
                     continue
                 else:
                     raise QSCOUTError(
                         "Cannot measure only qubits %s and not whole register."
-                        % reset_accumulator
+                        % measure_accumulator
                     )
                     # measure_accumulator = set()
             if isinstance(instr, Gate):
