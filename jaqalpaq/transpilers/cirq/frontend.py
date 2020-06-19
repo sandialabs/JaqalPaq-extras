@@ -48,7 +48,7 @@ def qscout_circuit_from_cirq_circuit(ccirc, names=None, native_gates=None):
     :returns: The same quantum circuit, converted to JaqalPaq.
     :rtype: ScheduledCircuit
     :raises JaqalError: If the circuit includes a gate not included in `names`.
-    """  # TODO: Document this better.
+    """
     qcirc = ScheduledCircuit(native_gates=native_gates)
     if names is None:
         names = CIRQ_NAMES
@@ -77,9 +77,9 @@ def qscout_circuit_from_cirq_circuit(ccirc, names=None, native_gates=None):
             need_prep = True
             continue
         if len(moment) > 1:
-            block = qcirc.block(
-                parallel=True
-            )  # Note: If you tell Cirq you want MS gates in parallel, we'll generate a Jaqal file with exactly that, never mind that QSCOUT can't execute it.
+            block = qcirc.block(parallel=True)
+            # Note: If you tell Cirq you want MS gates in parallel, we'll generate a Jaqal
+            # file with exactly that, never mind that QSCOUT can't execute it.
         else:
             block = qcirc.body
         for op in moment:
@@ -106,8 +106,7 @@ def qscout_circuit_from_cirq_circuit(ccirc, names=None, native_gates=None):
                     raise JaqalError("Convert circuit to ion gates before compiling.")
             else:
                 raise JaqalError("Cannot compile operation %s." % op)
-    if (
-        not need_prep
-    ):  # If we just measured, or the circuit is empty, don't add a final measurement.
+    if not need_prep: 
+    	# If we just measured, or the circuit is empty, don't add a final measurement.
         qcirc.gate("measure_all")
     return qcirc
