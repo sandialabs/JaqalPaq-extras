@@ -1,3 +1,3 @@
-from .frontend import qscout_circuit_from_cirq_circuit
+from .frontend import jaqal_circuit_from_cirq_circuit
 
-__all__ = ["qscout_circuit_from_cirq_circuit"]
+__all__ = ["jaqal_circuit_from_cirq_circuit"]

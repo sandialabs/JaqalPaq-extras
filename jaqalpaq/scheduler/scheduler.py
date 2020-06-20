@@ -4,8 +4,8 @@ from jaqalpaq import JaqalError
 
 def schedule_circuit(circ):
     """
-    Takes every :class:`qscout.core.BlockStatement` in a circuit with ``parallel=None``, and
-    replaces it with a block that is functionally identical (contains the same gates,
+    Takes every :class:`jaqalpaq.core.BlockStatement` in a circuit with ``parallel=None``,
+    and replaces it with a block that is functionally identical (contains the same gates,
     without reordering any non-commuting operations); complies with the restrictions of
     the QSCOUT hardware and low-level software stack; and reorders gates to act in
     parallel where possible.

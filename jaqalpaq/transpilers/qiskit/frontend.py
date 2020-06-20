@@ -19,22 +19,23 @@ QISKIT_NAMES = {
 }
 
 
-def qscout_circuit_from_dag_circuit(dag):
+def JAQAL_circuit_from_dag_circuit(dag):
     """
-    Converts a Qiskit directed-acyclic-graph representation of a circuit to a :class:`qscout.core.ScheduledCircuit`.
-    See :func:`qscout_circuit_from_qiskit_circuit` for details.
+    Converts a Qiskit directed-acyclic-graph representation of a circuit to a
+    :class:`jaqalpaq.core.ScheduledCircuit`.
+    See :func:`JAQAL_circuit_from_qiskit_circuit` for details.
 
     :param qiskit.dagcircuit.DAGCircuit dag: The directed acyclic graph circuit to convert.
     :returns: The same quantum circuit, converted to JaqalPaq.
-    :rtype: qscout.core.ScheduledCircuit
+    :rtype: jaqalpaq.core.ScheduledCircuit
     """
     return qscout_circuit_from_qiskit_circuit(dag_to_circuit(dag))
 
 
-def qscout_circuit_from_qiskit_circuit(circuit, names=None, native_gates=None):
+def jaqal_circuit_from_qiskit_circuit(circuit, names=None, native_gates=None):
     """
-    Converts a Qiskit circuit to a :class:`qscout.core.ScheduledCircuit`. The circuit will
-    be structured into a sequence of unscheduled blocks. All instructions between one
+    Converts a Qiskit circuit to a :class:`jaqalpaq.core.ScheduledCircuit`. The circuit
+    will be structured into a sequence of unscheduled blocks. All instructions between one
     barrier statement and the next will be put into an unscheduled block together. If the
     :mod:`qscout.scheduler` is run on the circuit, as many as possible of those gates will
     be parallelized within each block, while maintaining the order of the blocks.
@@ -51,18 +52,21 @@ def qscout_circuit_from_qiskit_circuit(circuit, names=None, native_gates=None):
     with the appropriate names.
 
     :param qiskit.circuit.QuantumCircuit circuit: The circuit to convert.
-    :param names: A mapping from names of Qiskit gates to the corresponding native Jaqal gate names.
-        If omitted, maps i, r (:class:`qscout.qiskit.RGate`), sx (:class:`qscout.qiskit.SXGate`),
-        sy (:class:`qscout.qiskit.SYGate`), x, y, rz, and ms2 (:class:`qscout.qiskit.MSGate`)
-        to their QSCOUT counterparts.
+    :param names: A mapping from names of Qiskit gates to the corresponding native Jaqal
+    	gate names. If omitted, maps i, r (:class:`jaqalpaq.transpilers.qiskit.RGate`),
+        sx (:class:`jaqalpaq.qiskit.SXGate`), sy (:class:`jaqalpaq.qiskit.SYGate`), x, y,
+        rz, and ms2 (:class:`jaqalpaq.qiskit.MSGate`) to their QSCOUT counterparts.
     :type names: dict or None
-    :param native_gates: The native gate set to target. If None, target the QSCOUT native gates.
+    :param native_gates: The native gate set to target. If None, target the QSCOUT native
+    	gates.
     :type native_gates: dict or None
     :returns: The same quantum circuit, converted to JaqalPaq.
-    :rtype: qscout.core.ScheduledCircuit
-    :raises JaqalError: If any instruction acts on a qubit from a register other than the circuit's qregs.
+    :rtype: jaqalpaq.core.ScheduledCircuit
+    :raises JaqalError: If any instruction acts on a qubit from a register other than the
+    	circuit's qregs.
     :raises JaqalError: If the circuit includes a snapshot instruction.
-    :raises JaqalError: If the user tries to measure or reset only some of the qubits, rather than all of them.
+    :raises JaqalError: If the user tries to measure or reset only some of the qubits,
+    	rather than all of them.
     :raises JaqalError: If the circuit includes a gate not included in `names`.
     """
     n = sum([qreg.size for qreg in circuit.qregs])

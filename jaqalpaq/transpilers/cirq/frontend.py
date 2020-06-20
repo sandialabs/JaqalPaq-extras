@@ -22,8 +22,8 @@ CIRQ_NAMES = {
 }
 
 
-def qscout_circuit_from_cirq_circuit(ccirc, names=None, native_gates=None):
-    """Converts a Cirq Circuit object to a :class:`qscout.core.ScheduledCircuit`.
+def jaqal_circuit_from_cirq_circuit(ccirc, names=None, native_gates=None):
+    """Converts a Cirq Circuit object to a :class:`jaqalpaq.core.ScheduledCircuit`.
     The circuit will be structured as a sequence of parallel blocks, one for each Cirq
     Moment in the input.
 
