@@ -87,6 +87,7 @@ class JaqalBackend(BasicEngine):
     :param native_gates: The native gate set to target. If None, target the QSCOUT native gates.
     :type native_gates: dict or None
     """
+
     def __init__(
         self,
         outfile=None,
