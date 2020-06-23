@@ -39,7 +39,7 @@ def jaqal_circuit_from_cirq_circuit(ccirc, names=None, native_gates=None):
 
     :param cirq.Circuit ccirc: The Circuit to convert.
     :param names: A mapping from Cirq gate classes to the corresponding native Jaqal gate
-    	names. If omitted, maps ``cirq.XXPowGate``, ``cirq.XPowGate``, ``cirq.YPowGate``,
+        names. If omitted, maps ``cirq.XXPowGate``, ``cirq.XPowGate``, ``cirq.YPowGate``,
         ``cirq.ZPowGate``, and ``cirq.PhasedXPowGate`` to their QSCOUT counterparts. The
         ``cirq.ConvertToIonGates`` function will transpile a circuit into this basis.
     :type names: dict or None
@@ -106,7 +106,7 @@ def jaqal_circuit_from_cirq_circuit(ccirc, names=None, native_gates=None):
                     raise JaqalError("Convert circuit to ion gates before compiling.")
             else:
                 raise JaqalError("Cannot compile operation %s." % op)
-    if not need_prep: 
-    	# If we just measured, or the circuit is empty, don't add a final measurement.
+    if not need_prep:
+        # If we just measured, or the circuit is empty, don't add a final measurement.
         qcirc.gate("measure_all")
     return qcirc

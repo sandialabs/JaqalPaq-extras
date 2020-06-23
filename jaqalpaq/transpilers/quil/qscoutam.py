@@ -7,7 +7,7 @@ class QSCOUTAM(QAM):
     """
     Quantum Abstract Machine representing the QSCOUT hardware. It will refuse to load or
     run programs, but can be used as a compilation target. Instead of using the Quil API
-    to load and run programs, instead compile them to Jaqal files and submit them to 
+    to load and run programs, instead compile them to Jaqal files and submit them to
     the QSCOUT team directly.
     """
 

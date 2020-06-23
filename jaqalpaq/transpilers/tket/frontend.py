@@ -44,14 +44,14 @@ def jaqal_circuit_from_tket_circuit(tkc, native_gates=None, names=None):
     :param pytket.circuit.Circuit tkc: The Circuit to convert.
     :param names: A mapping from pytket OpTypes to functions taking qubits and gate
     angle parameters and returning a tuple of arguments for
-		:meth:`jaqalpaq.core.ScheduledCircuit.build_gate`. If omitted, maps
-		``pytket.OpType.PhasedX`` to the QSCOUT ``R`` gate, ``pytket.OpType.Rz`` to the
-		QSCOUT ``Rz`` gate, and ``pytket.OpType.XXPhase`` to the QSCOUT ``MS`` gate. The
+        :meth:`jaqalpaq.core.ScheduledCircuit.build_gate`. If omitted, maps
+        ``pytket.OpType.PhasedX`` to the QSCOUT ``R`` gate, ``pytket.OpType.Rz`` to the
+        QSCOUT ``Rz`` gate, and ``pytket.OpType.XXPhase`` to the QSCOUT ``MS`` gate. The
         ``pytket.passes.SynthesizeUMD`` compilation pass will compile a circuit into this
         basis.
     :type names: dict or None
     :param native_gates: The native gate set to target. If None, target the QSCOUT native
-    	gates.
+        gates.
     :type native_gates: dict or None
     :returns: The same quantum circuit, converted to JaqalPaq.
     :rtype: ScheduledCircuit

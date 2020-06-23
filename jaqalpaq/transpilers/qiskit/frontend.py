@@ -53,20 +53,20 @@ def jaqal_circuit_from_qiskit_circuit(circuit, names=None, native_gates=None):
 
     :param qiskit.circuit.QuantumCircuit circuit: The circuit to convert.
     :param names: A mapping from names of Qiskit gates to the corresponding native Jaqal
-    	gate names. If omitted, maps i, r (:class:`jaqalpaq.transpilers.qiskit.RGate`),
+        gate names. If omitted, maps i, r (:class:`jaqalpaq.transpilers.qiskit.RGate`),
         sx (:class:`jaqalpaq.qiskit.SXGate`), sy (:class:`jaqalpaq.qiskit.SYGate`), x, y,
         rz, and ms2 (:class:`jaqalpaq.qiskit.MSGate`) to their QSCOUT counterparts.
     :type names: dict or None
     :param native_gates: The native gate set to target. If None, target the QSCOUT native
-    	gates.
+        gates.
     :type native_gates: dict or None
     :returns: The same quantum circuit, converted to JaqalPaq.
     :rtype: jaqalpaq.core.ScheduledCircuit
     :raises JaqalError: If any instruction acts on a qubit from a register other than the
-    	circuit's qregs.
+        circuit's qregs.
     :raises JaqalError: If the circuit includes a snapshot instruction.
     :raises JaqalError: If the user tries to measure or reset only some of the qubits,
-    	rather than all of them.
+        rather than all of them.
     :raises JaqalError: If the circuit includes a gate not included in `names`.
     """
     n = sum([qreg.size for qreg in circuit.qregs])
