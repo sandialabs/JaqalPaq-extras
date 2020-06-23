@@ -12,13 +12,13 @@ Python Jaqal Programming Package (JaqalPaq)
 
 API Reference
 -------------
-JaqalPaq currently consists of the :mod:`jaqalpaq` Python package, and its nine subpackages.
+JaqalPaq currently consists of the :mod:`jaqalpaq` Python package, and its five subpackages.
 
 * The :mod:`jaqalpaq.core` package implements an object representation of scheduled quantum circuits. It supports programmatically constructing and manipulating circuits.
 * The :mod:`jaqalpaq.parser` package parses Jaqal source files into :mod:`jaqalpaq.core` :class:`ScheduledCircuit` objects.
 * The :mod:`jaqalpaq.generator` package generates Jaqal code that implements the quantum circuit described by a :class:`ScheduledCircuit` object.
 * The :mod:`jaqalpaq.scheduler` package modifies circuits to execute more gates in parallel, without changing the function of the circuit or breaking the restrictions of the QSCOUT hardware.
-* The :mod:`jaqalpaq.cirq`, :mod:`jaqalpaq.projectq`, :mod:`jaqalpaq.qiskit`, :mod:`jaqalpaq.quil`, and :mod:`jaqalpaq.tket` packages allow conversion between :mod:`jaqalpaq.core` objects and their counterparts in other popular quantum software development frameworks.
+* The :mod:`jaqalpaq.transpiler.cirq`, :mod:`jaqalpaq.transpiler.projectq`, :mod:`jaqalpaq.transpiler.qiskit`, :mod:`jaqalpaq.transpiler.quil`, and :mod:`jaqalpaq.transpiler.tket` packages allow conversion between :mod:`jaqalpaq.core` objects and their counterparts in other popular quantum software development frameworks.
 
 Additionally, the top-level :mod:`jaqalpaq` package provides a few useful imports that don't fit
 within the scope of any of the above subpackages: the :exc:`jaqalpaq.JaqalError` class and a collection of :data:`RESERVED_WORDS`.

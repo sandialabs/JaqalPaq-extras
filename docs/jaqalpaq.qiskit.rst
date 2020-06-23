@@ -1,7 +1,7 @@
-jaqalpaq.qiskit package
+jaqalpaq.transpilers.qiskit package
 =======================
 
-.. automodule:: jaqalpaq.qiskit
+.. automodule:: jaqalpaq.transpilers.qiskit
    :members:
    :undoc-members:
    :show-inheritance:

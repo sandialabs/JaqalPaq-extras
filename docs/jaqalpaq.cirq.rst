@@ -1,7 +1,7 @@
-jaqalpaq.cirq package
+jaqalpaq.transpilers.cirq package
 =====================
 
-.. automodule:: jaqalpaq.cirq
+.. automodule:: jaqalpaq.transpilers.cirq
    :members:
    :undoc-members:
    :show-inheritance:
