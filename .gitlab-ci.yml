@@ -21,6 +21,6 @@ syntax:
 pytest:
   stage: Test
   script:
-    - ( unset https_proxy ; cd .. && rm -fr jaqal-pup && git clone --depth 1 https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.sandia.gov/jaqal/jaqal-pup.git/  )
-    - ( cd ../jaqal-pup && pip install -e .[tests] )
+    - ( unset https_proxy ; cd .. && rm -fr jaqalpaq && git clone --depth 1 https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.sandia.gov/jaqal/jaqalpaq.git/  )
+    - ( cd ../jaqalpaq && pip install -e .[tests] )
     - pip install -e . && pytest
