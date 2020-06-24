@@ -3,12 +3,6 @@
 import sys
 from setuptools import setup
 
-try:
-    from sphinx.setup_command import BuildDoc
-except ImportError:
-    print("Warning: document cannot be built without sphinx")
-    BuildDoc = None
-
 name = "JaqalPaq-extras"
 description = "Python tools for Jaqal (extras)"
 version = "1.0"
@@ -30,7 +24,7 @@ setup(
     ],
     package_dir={"": "."},
     install_requires=["JaqalPaq"],
-    extras_requires={"tests": ["pytest"], "docs": ["sphinx"],},
+    extras_requires={"tests": ["pytest"],},
     python_requires=">=3.6.5",
     platforms=["any"],
     url="https://qscout.sandia.gov",
@@ -44,5 +38,4 @@ setup(
         "Operating System :: MacOS :: MacOS X",
         "Operating System :: Unix",
     ],
-    cmdclass={"build_sphinx": BuildDoc},
 )
