@@ -9,7 +9,7 @@ except ImportError:
     print("Warning: document cannot be built without sphinx")
     BuildDoc = None
 
-name = "JaqalPaq-extra"
+name = "JaqalPaq-extras"
 description = "Python tools for Jaqal (extras)"
 version = "1.0"
 
