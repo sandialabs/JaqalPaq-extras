@@ -1,4 +1,4 @@
-from jaqalpaq.core import BlockStatement, LoopStatement, GateStatement, QUBIT_TYPE
+from jaqalpaq.core import BlockStatement, LoopStatement, GateStatement, ParamType
 from jaqalpaq import JaqalError
 
 
@@ -170,7 +170,7 @@ def can_parallelize_subinstr(circ, sub_instr):
             [
                 p
                 for p in circ.native_gates[sub_instr.name].parameters
-                if p.kind == QUBIT_TYPE
+                if p.kind == ParamType.QUBIT
             ]
         )
         > 1
