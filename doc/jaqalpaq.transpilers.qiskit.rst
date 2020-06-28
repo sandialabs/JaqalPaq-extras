@@ -1,5 +1,5 @@
 jaqalpaq.transpilers.qiskit package
-=======================
+===================================
 
 .. automodule:: jaqalpaq.transpilers.qiskit
    :members:
@@ -7,7 +7,7 @@ jaqalpaq.transpilers.qiskit package
    :show-inheritance:
 
 qiskit.circuit.QuantumCircuit extensions
-------------------------------------------
+----------------------------------------
 
 Importing the jaqalpaq.qiskit package also patches the :class:`qiskit.circuit.QuantumCircuit` object,
 adding the following four methods. This follows the standard Qiskit API, allowing

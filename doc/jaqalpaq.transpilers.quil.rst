@@ -1,5 +1,5 @@
 jaqalpaq.transpilers.quil package
-=====================
+=================================
 
 .. automodule:: jaqalpaq.transpilers.quil
    :members:
