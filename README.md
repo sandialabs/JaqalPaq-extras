@@ -10,8 +10,8 @@ programming toolsets, including transpiling.  In particular, we include
 * The ability to convert the data structures used by many other quantum
   software toolchains to our internal representation. Ideally this will
   include:
-    * IBM's Qiskit/OpenQASM
-    * Rigetti's Quil/pyquil/quilc
+    * IBM's Qiskit
+    * Rigetti's pyquil
     * Google's Cirq
     * Microsoft's Q#
     * ETH Zurich's ProjectQ

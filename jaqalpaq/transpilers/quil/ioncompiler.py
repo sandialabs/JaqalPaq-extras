@@ -2,7 +2,8 @@ from pyquil.api._qac import AbstractCompiler
 from typing import Optional
 from pyquil.quil import Program, Gate
 from pyquil.quilbase import Measurement, ResetQubit, Reset
-from jaqalpaq.core import ScheduledCircuit
+from jaqalpaq.core import CircuitBuilder, ScheduledCircuit
+from jaqalpaq.core.circuitbuilder import UnscheduledBlockBuilder
 from jaqalpaq import JaqalError
 import numpy as np
 
@@ -38,6 +39,10 @@ class IonCompiler(AbstractCompiler):
         if self.names is None:
             self.names = QUIL_NAMES
         self.native_gates = native_gates
+        if self.native_gates is None:
+            from qscout.v1.std import NATIVE_GATES
+
+            self.native_gates = NATIVE_GATES
 
     def quil_to_native_quil(self, program: Program, *, protoquil=None) -> Program:
         """
@@ -80,22 +85,26 @@ class IonCompiler(AbstractCompiler):
                 "Program uses more qubits (%d) than device supports (%d)."
                 % (n, len(self._device.qubits()))
             )
-        qsc = ScheduledCircuit(native_gates=self.native_gates)
-        qsc.body.parallel = None  # Quil doesn't support barriers, so either the user
+        qsc = CircuitBuilder(native_gates=self.native_gates)
+        block = UnscheduledBlockBuilder()
+        qsc.expression.append(block.expression)
+        # Quil doesn't support barriers, so either the user
         # won't run the the scheduler and everything will happen
         # sequentially, or the user will and everything can be
         # rescheduled as needed.
-        qreg = qsc.reg("qreg", n)
-        qsc.gate("prepare_all")
+        qreg = qsc.register("qreg", n)
+        block.gate("prepare_all")
         reset_accumulator = set()
         measure_accumulator = set()
+        in_preamble = True
         for instr in nq_program:
             if reset_accumulator:
                 if isinstance(instr, ResetQubit):
                     reset_accumulator.add(instr.qubit.index)
                     if nq_program.get_qubits() <= reset_accumulator:
-                        qsc.gate("prepare_all")
+                        block.gate("prepare_all")
                         reset_accumulator = set()
+                        in_preamble = False
                     continue
                 else:
                     raise JaqalError(
@@ -107,8 +116,9 @@ class IonCompiler(AbstractCompiler):
                 if isinstance(instr, Measurement):
                     measure_accumulator.add(instr.qubit.index)
                     if nq_program.get_qubits() <= measure_accumulator:
-                        qsc.gate("measure_all")
+                        block.gate("measure_all")
                         measure_accumulator = set()
+                        in_preamble = False
                     continue
                 else:
                     raise JaqalError(
@@ -118,18 +128,20 @@ class IonCompiler(AbstractCompiler):
                     # measure_accumulator = set()
             if isinstance(instr, Gate):
                 if instr.name in self.names:
-                    qsc.gate(
+                    block.gate(
                         self.names[instr.name],
                         *[qreg[qubit.index] for qubit in instr.qubits],
                         *[float(p) for p in instr.params]
                     )
+                    in_preamble = False
                 else:
                     raise JaqalError("Gate %s not in native gate set." % instr.name)
             elif isinstance(instr, Reset):
-                if len(qsc.body) > 1:
-                    qsc.gate("prepare_all")
+                if not in_preamble:
+                    block.gate("prepare_all")
+                    in_preamble = False
             elif isinstance(instr, ResetQubit):
-                if len(qsc.body) > 1:
+                if not in_preamble:
                     reset_accumulator = {instr.qubit.index}
             elif isinstance(instr, Measurement):
                 measure_accumulator = {
@@ -137,6 +149,5 @@ class IonCompiler(AbstractCompiler):
                 }  # We ignore the classical register.
             else:
                 raise JaqalError("Instruction %s not supported." % instr.out())
-        if qsc.body[-1].name != "measure_all":
-            qsc.gate("measure_all")
-        return qsc
+        block.gate("measure_all", no_duplicate=True)
+        return qsc.build()

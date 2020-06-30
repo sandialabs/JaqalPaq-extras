@@ -1,5 +1,3 @@
-from jaqalpaq.core import ScheduledCircuit
-from ..qscout.native_gates import NATIVE_GATES
 from jaqalpaq import JaqalError
 import networkx as nx
 from pyquil.device import NxDevice
@@ -46,6 +44,8 @@ def patch_simulator():
         The simulator will give an error if QSCOUT native gates are passed to it before calling this function!
     """
     dkt = {}
+    from qscout.v1.std import NATIVE_GATES
+
     for gate in NATIVE_GATES:
         if gate._ideal_gate is None:
             continue

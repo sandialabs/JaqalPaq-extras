@@ -1,5 +1,4 @@
-from jaqalpaq.core.circuit import ScheduledCircuit
-from jaqalpaq.core.gatedef import NATIVE_GATES
+from jaqalpaq.core import CircuitBuilder
 from jaqalpaq import JaqalError
 from cirq import (
     XXPowGate,
@@ -49,7 +48,11 @@ def jaqal_circuit_from_cirq_circuit(ccirc, names=None, native_gates=None):
     :rtype: ScheduledCircuit
     :raises JaqalError: If the circuit includes a gate not included in `names`.
     """
-    qcirc = ScheduledCircuit(native_gates=native_gates)
+    if native_gates is None:
+        from qscout.v1.std import NATIVE_GATES
+
+        native_gates = NATIVE_GATES
+    builder = CircuitBuilder(native_gates=native_gates)
     if names is None:
         names = CIRQ_NAMES
     try:
@@ -60,53 +63,41 @@ def jaqal_circuit_from_cirq_circuit(ccirc, names=None, native_gates=None):
         n = len(cqubits)
         qubitmap = {cqubits[i]: i for i in range(n)}
         line = False
-    allqubits = qcirc.reg("allqubits", n)
+    allqubits = builder.register("allqubits", n)
     need_prep = True
     for moment in ccirc:
         if len(moment) == 0:
             continue
         if need_prep:
-            qcirc.gate("prepare_all")
+            builder.gate("prepare_all")
             need_prep = False
         if (
             len(moment) == n
             and all([op.gate for op in moment])
             and all([isinstance(op.gate, MeasurementGate) for op in moment])
         ):
-            qcirc.gate("measure_all")
+            builder.gate("measure_all")
             need_prep = True
             continue
         if len(moment) > 1:
-            block = qcirc.block(parallel=True)
+            block = builder.block(parallel=True)
             # Note: If you tell Cirq you want MS gates in parallel, we'll generate a Jaqal
             # file with exactly that, never mind that QSCOUT can't execute it.
         else:
-            block = qcirc.body
+            block = builder
         for op in moment:
             if op.gate:
                 if type(op.gate) in names:
                     if line:
-                        block.append(
-                            qcirc.build_gate(
-                                *names[type(op.gate)](
-                                    op.gate, *[allqubits[qb.x] for qb in op.qubits]
-                                )
-                            )
-                        )
+                        targets = [allqubits[qb.x] for qb in op.qubits]
                     else:
-                        block.append(
-                            qcirc.build_gate(
-                                *names[type(op.gate)](
-                                    op.gate,
-                                    *[allqubits[qubitmap[qb]] for qb in op.qubits]
-                                )
-                            )
-                        )
+                        targets = [allqubits[qubitmap[qb]] for qb in op.qubits]
+                    block.gate(*names[type(op.gate)](op.gate, *targets))
                 else:
                     raise JaqalError("Convert circuit to ion gates before compiling.")
             else:
                 raise JaqalError("Cannot compile operation %s." % op)
     if not need_prep:
         # If we just measured, or the circuit is empty, don't add a final measurement.
-        qcirc.gate("measure_all")
-    return qcirc
+        builder.gate("measure_all")
+    return builder.build()

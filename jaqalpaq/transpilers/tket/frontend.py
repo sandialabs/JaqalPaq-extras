@@ -1,6 +1,10 @@
 from pytket.circuit import OpType
 
-from jaqalpaq.core import ScheduledCircuit, BlockStatement
+from jaqalpaq.core.circuitbuilder import (
+    CircuitBuilder,
+    UnscheduledBlockBuilder,
+    SequentialBlockBuilder,
+)
 
 import numpy as np
 
@@ -66,39 +70,49 @@ def jaqal_circuit_from_tket_circuit(tkc, native_gates=None, names=None):
         else:
             qreg_sizes[qb.reg_name] = qb.index[0] + 1
     n = sum(qreg_sizes.values())
-    qsc = ScheduledCircuit(native_gates=native_gates)
+    if native_gates is None:
+        from qscout.v1.std import NATIVE_GATES
+
+        native_gates = NATIVE_GATES
+    qsc = CircuitBuilder(native_gates=native_gates)
     if names is None:
         names = TKET_NAMES
-    baseregister = qsc.reg("baseregister", n)
+    baseregister = qsc.register("baseregister", n)
     offset = 0
+    registers = {}
     for qreg in qreg_sizes:
-        qsc.map(qreg, baseregister, slice(offset, offset + qreg_sizes[qreg]))
+        registers[qreg] = qsc.map(
+            qreg, baseregister, slice(offset, offset + qreg_sizes[qreg])
+        )
         offset += qreg_sizes[qreg]
-    qsc.gate("prepare_all")
     # We're going to divide the circuit up into blocks. Each block will contain every gate
     # between one barrier statement and the next. If the circuit is output with no further
     # processing, then the gates in each block will be run in sequence. However, if the
     # circuit is passed to the scheduler, it'll try to parallelize as many of the gates
     # within each block as possible, while keeping the blocks themselves sequential.
-    block = qsc.block(parallel=None)
+    block = UnscheduledBlockBuilder()
+    qsc.expression.append(block.expression)
+    block.gate("prepare_all")
     measure_accumulator = set()
     for command in tkc:
         block, measure_accumulator = convert_command(
-            command, qsc, block, names, measure_accumulator, n
+            command, qsc, block, names, measure_accumulator, n, registers
         )
-    if qsc.body[-1][-1].name != "measure_all":
-        qsc.gate("measure_all")
-    return qsc
+    block.gate("measure_all", no_duplicate=True)
+    return qsc.build()
 
 
-def convert_command(command, qsc, block, names, measure_accumulator, n, remaps=None):
+def convert_command(
+    command, qsc, block, names, measure_accumulator, n, registers, remaps=None
+):
     if remaps is None:
         remaps = range(n)
     op_type = command.op.get_type()
+    print(op_type)
     if measure_accumulator:
         if op_type == OpType.Measure:
             target = command.qubits[0]
-            if target.reg_name in qsc.registers:
+            if target.reg_name in registers:
                 measure_accumulator.add(target.resolve_qubit(target.index)[1])
             else:
                 raise JaqalError("Register %s invalid!" % target.register.name)
@@ -115,22 +129,22 @@ def convert_command(command, qsc, block, names, measure_accumulator, n, remaps=N
     if op_type == OpType.Measure:
         qb = command.qubits[0]
         if len(qb.index) != 1:
-            target = qsc.registers[qb.reg_name + "_".join([str(x) for x in qb.index])][
-                0
-            ]
+            target = registers[qb.reg_name + "_".join([str(x) for x in qb.index])][0]
         else:
-            target = qsc.registers[qb.reg_name][qb.index[0]]
+            target = registers[qb.reg_name][qb.index[0]]
         measure_accumulator = {target.resolve_qubit()[1]}
     elif op_type == OpType.Barrier:
-        block = qsc.block(
-            parallel=None
-        )  # Use barriers to inform the scheduler, as explained above.
+        block = UnscheduledBlockBuilder()
+        qsc.expression.append(block.expression)
+        # Use barriers to inform the scheduler, as explained above.
     elif op_type in (OpType.CircBox, OpType.ExpBox, OpType.PauliExpBox):
         new_remaps = [remaps[qb.index[0]] for qb in command.qubits]
-        macro_block = BlockStatement()
+        macro_block = SequentialBlockBuilder()
         subcirq = command.op.get_circuit()
         for cmd in subcirq:
-            convert_command(cmd, qsc, macro_block, names, set(), n, new_remaps)
+            convert_command(
+                cmd, qsc, macro_block, names, set(), n, registers, new_remaps
+            )
         macro_name = f"macro_{len(qsc.macros)}"
         qsc.macro(macro_name, [], macro_block)
         block.append(qsc.build_gate(macro_name))
@@ -143,16 +157,14 @@ def convert_command(command, qsc, block, names, measure_accumulator, n, remaps=N
                 len(qb.index) != 1
             ):  # TODO: Figure out how to pass multi-index qubits in macros.
                 qb_targets.append(
-                    qsc.registers[qb.reg_name + "_".join([str(x) for x in qb.index])][0]
+                    registers[qb.reg_name + "_".join([str(x) for x in qb.index])][0]
                 )
             else:
-                qb_targets.append(qsc.registers[qb.reg_name][remaps[qb.index[0]]])
-        block.append(
-            qsc.build_gate(
-                *names[op_type](
-                    *qb_targets,
-                    *[float(param) * np.pi for param in command.op.get_params()],
-                )
+                qb_targets.append(registers[qb.reg_name][remaps[qb.index[0]]])
+        block.gate(
+            *names[op_type](
+                *qb_targets,
+                *[float(param) * np.pi for param in command.op.get_params()],
             )
         )
     else:
