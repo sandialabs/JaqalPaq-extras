@@ -23,6 +23,7 @@ class ProjectQTranspilerTester(unittest.TestCase):
         SqrtX | q1
         SqrtX | q2
         Barrier | (q1, q2)
+        Rxx(1.0) | (q1, q2)
         All(Measure) | [q1, q2]
         eng.flush()
         circ = backend.circuit
@@ -33,6 +34,7 @@ class ProjectQTranspilerTester(unittest.TestCase):
         block.gate("Sx", reg[0])
         block.gate("Sx", reg[1])
         block = jcirc.block()
+        block.gate("MS", reg[0], reg[1], 0, 1.0)
         block.gate("measure_all")
         self.assertEqual(
             generate_jaqal_program(jcirc.build()), generate_jaqal_program(circ)

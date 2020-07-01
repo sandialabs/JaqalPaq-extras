@@ -63,15 +63,25 @@ def quil_gates(native_gates=None):
         quil_name = gate.name.upper()
         classical_count = len(gate.classical_parameters)
         if classical_count == 0:
-            gates[quil_name] = lambda *args: Gate(
-                name=quil_name,
-                params=args[:classical_count],
-                qubits=[unpack_qubit(q) for q in args[classical_count:]],
-            )
+            gates[quil_name] = (
+                lambda quil_name, classical_count: (
+                    lambda *args: Gate(
+                        name=quil_name,
+                        params=args[:classical_count],
+                        qubits=[unpack_qubit(q) for q in args[classical_count:]],
+                    )
+                )
+            )(quil_name, classical_count)
         else:
-            gates[quil_name] = lambda *args: Gate(
-                name=quil_name, params=[], qubits=[unpack_qubit(q) for q in args]
-            )
+            gates[quil_name] = (
+                lambda quil_name: (
+                    lambda *args: Gate(
+                        name=quil_name,
+                        params=[],
+                        qubits=[unpack_qubit(q) for q in args],
+                    )
+                )
+            )(quil_name)
     return gates
 
 

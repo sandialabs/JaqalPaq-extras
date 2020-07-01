@@ -111,13 +111,19 @@ def convert_command(
     print(op_type)
     if measure_accumulator:
         if op_type == OpType.Measure:
-            target = command.qubits[0]
-            if target.reg_name in registers:
-                measure_accumulator.add(target.resolve_qubit(target.index)[1])
+            qb = command.qubits[0]
+            if qb.reg_name in registers:
+                if len(qb.index) != 1:
+                    target = registers[
+                        qb.reg_name + "_".join([str(x) for x in qb.index])
+                    ][0]
+                else:
+                    target = registers[qb.reg_name][qb.index[0]]
+                measure_accumulator.add(target.resolve_qubit()[1])
             else:
                 raise JaqalError("Register %s invalid!" % target.register.name)
             if len(measure_accumulator) == n:
-                block.append(qsc.build_gate("measure_all"))
+                block.gate("measure_all")
                 measure_accumulator = set()
             return block, measure_accumulator
         else:
@@ -133,6 +139,9 @@ def convert_command(
         else:
             target = registers[qb.reg_name][qb.index[0]]
         measure_accumulator = {target.resolve_qubit()[1]}
+        if len(measure_accumulator) == n:
+            block.gate("measure_all")
+            measure_accumulator = set()
     elif op_type == OpType.Barrier:
         block = UnscheduledBlockBuilder()
         qsc.expression.append(block.expression)
