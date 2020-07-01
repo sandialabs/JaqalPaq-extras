@@ -107,7 +107,7 @@ def convert_command(
 ):
     if remaps is None:
         remaps = range(n)
-    op_type = command.op.get_type()
+    op_type = command.op.type
     print(op_type)
     if measure_accumulator:
         if op_type == OpType.Measure:
@@ -163,8 +163,7 @@ def convert_command(
                 qb_targets.append(registers[qb.reg_name][remaps[qb.index[0]]])
         block.gate(
             *names[op_type](
-                *qb_targets,
-                *[float(param) * np.pi for param in command.op.get_params()],
+                *qb_targets, *[float(param) * np.pi for param in command.op.params],
             )
         )
     else:

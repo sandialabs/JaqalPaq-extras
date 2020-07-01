@@ -10,7 +10,7 @@ from math import pi
 from jaqalpaq.core import CircuitBuilder
 
 
-class ProjectQTranspilerTester(unittest.TestCase):
+class CirqTranspilerTester(unittest.TestCase):
     def test_transpile_line_circuit(self):
         c = cirq.Circuit()
         qubits = [cirq.LineQubit(0), cirq.LineQubit(1)]
