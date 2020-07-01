@@ -1,8 +1,8 @@
 from pyquil.api._qac import AbstractCompiler
 from typing import Optional
 from pyquil.quil import Program, Gate
-from pyquil.quilbase import Measurement, ResetQubit, Reset
-from jaqalpaq.core import CircuitBuilder, ScheduledCircuit
+from pyquil.quilbase import Measurement, ResetQubit, Reset, Declare
+from jaqalpaq.core import CircuitBuilder, Circuit
 from jaqalpaq.core.circuitbuilder import UnscheduledBlockBuilder
 from jaqalpaq import JaqalError
 import numpy as np
@@ -56,11 +56,9 @@ class IonCompiler(AbstractCompiler):
         """
         return program  # TODO: Implement transpiler pass to convert arbitrary circuit.
 
-    def native_quil_to_executable(
-        self, nq_program: Program
-    ) -> Optional[ScheduledCircuit]:
+    def native_quil_to_executable(self, nq_program: Program) -> Optional[Circuit]:
         """
-        Compiles a Quil program to a :class:`qscout.core.ScheduledCircuit`. Because Quil
+        Compiles a Quil program to a :class:`qscout.core.Circuit`. Because Quil
         does not support any form of schedule control, the entire circuit will be put in a
         single unscheduled block. If the :mod:`qscout.scheduler` is run on the circuit, as
         many as possible of those gates will be parallelized, while maintaining the order
@@ -74,7 +72,7 @@ class IonCompiler(AbstractCompiler):
 
         :param pyquil.quil.Program nq_program: The program to compile.
         :returns: The same quantum program, converted to JaqalPaq.
-        :rtype: qscout.core.ScheduledCircuit
+        :rtype: qscout.core.Circuit
         :raises JaqalError: If the program includes a non-gate instruction other than resets or measurements.
         :raises JaqalError: If the user tries to measure or reset only some of the qubits, rather than all of them.
         :raises JaqalError: If the program includes a gate not included in `names`.
@@ -143,10 +141,18 @@ class IonCompiler(AbstractCompiler):
             elif isinstance(instr, ResetQubit):
                 if not in_preamble:
                     reset_accumulator = {instr.qubit.index}
+                    if nq_program.get_qubits() <= reset_accumulator:
+                        block.gate("prepare_all")
+                        reset_accumulator = set()
             elif isinstance(instr, Measurement):
-                measure_accumulator = {
-                    instr.qubit.index
-                }  # We ignore the classical register.
+                measure_accumulator = {instr.qubit.index}
+                # We ignore the classical register.
+                if nq_program.get_qubits() <= measure_accumulator:
+                    block.gate("measure_all")
+                    measure_accumulator = set()
+                    in_preamble = False
+            elif isinstance(instr, Declare):
+                pass  # Ignore allocations of classical memory.
             else:
                 raise JaqalError("Instruction %s not supported." % instr.out())
         block.gate("measure_all", no_duplicate=True)

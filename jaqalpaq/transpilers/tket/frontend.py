@@ -18,7 +18,7 @@ TKET_NAMES = {
 
 
 def jaqal_circuit_from_tket_circuit(tkc, native_gates=None, names=None):
-    """Converts a pytket Circuit object to a :class:`jaqalpaq.core.ScheduledCircuit`.
+    """Converts a pytket Circuit object to a :class:`jaqalpaq.core.Circuit`.
     The circuit will be structured as a sequence of parallel blocks, one for each Cirq
     Moment in the input. The circuit will be structured into a sequence of unscheduled
     blocks. All instructions between one barrier statement and the next will be put into
@@ -48,7 +48,7 @@ def jaqal_circuit_from_tket_circuit(tkc, native_gates=None, names=None):
     :param pytket.circuit.Circuit tkc: The Circuit to convert.
     :param names: A mapping from pytket OpTypes to functions taking qubits and gate
     angle parameters and returning a tuple of arguments for
-        :meth:`jaqalpaq.core.ScheduledCircuit.build_gate`. If omitted, maps
+        :meth:`jaqalpaq.core.Circuit.build_gate`. If omitted, maps
         ``pytket.OpType.PhasedX`` to the QSCOUT ``R`` gate, ``pytket.OpType.Rz`` to the
         QSCOUT ``Rz`` gate, and ``pytket.OpType.XXPhase`` to the QSCOUT ``MS`` gate. The
         ``pytket.passes.SynthesizeUMD`` compilation pass will compile a circuit into this
@@ -58,7 +58,7 @@ def jaqal_circuit_from_tket_circuit(tkc, native_gates=None, names=None):
         gates.
     :type native_gates: dict or None
     :returns: The same quantum circuit, converted to JaqalPaq.
-    :rtype: ScheduledCircuit
+    :rtype: jaqalpaq.core.Circuit
     :raises JaqalError: If the circuit includes a gate not included in `names`.
     """
     qreg_sizes = {}

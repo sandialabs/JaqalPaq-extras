@@ -22,7 +22,7 @@ CIRQ_NAMES = {
 
 
 def jaqal_circuit_from_cirq_circuit(ccirc, names=None, native_gates=None):
-    """Converts a Cirq Circuit object to a :class:`jaqalpaq.core.ScheduledCircuit`.
+    """Converts a Cirq Circuit object to a :class:`jaqalpaq.core.Circuit`.
     The circuit will be structured as a sequence of parallel blocks, one for each Cirq
     Moment in the input.
 
@@ -45,7 +45,7 @@ def jaqal_circuit_from_cirq_circuit(ccirc, names=None, native_gates=None):
     :param native_gates: The native gate set to target. If None, target the QSCOUT native gates.
     :type native_gates: dict or None
     :returns: The same quantum circuit, converted to JaqalPaq.
-    :rtype: ScheduledCircuit
+    :rtype: Circuit
     :raises JaqalError: If the circuit includes a gate not included in `names`.
     """
     if native_gates is None:

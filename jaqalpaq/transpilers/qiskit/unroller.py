@@ -17,13 +17,13 @@ from qiskit.dagcircuit import DAGCircuit
 from qiskit.exceptions import QiskitError
 from qiskit.circuit import ParameterExpression
 from qiskit.qasm import pi
-from qiskit.extensions.standard.iden import IdGate
-from qiskit.extensions.standard.x import XGate
-from qiskit.extensions.standard.y import YGate
-from qiskit.extensions.standard.z import ZGate
-from qiskit.extensions.standard.rx import RXGate
-from qiskit.extensions.standard.ry import RYGate
-from qiskit.extensions.standard.rz import RZGate
+from qiskit.circuit.library.standard_gates.i import IdGate
+from qiskit.circuit.library.standard_gates.x import XGate
+from qiskit.circuit.library.standard_gates.y import YGate
+from qiskit.circuit.library.standard_gates.z import ZGate
+from qiskit.circuit.library.standard_gates.rx import RXGate
+from qiskit.circuit.library.standard_gates.ry import RYGate
+from qiskit.circuit.library.standard_gates.rz import RZGate
 from qiskit.circuit import QuantumRegister
 from .gates import MSGate, SXGate, SYGate, RGate
 
@@ -111,7 +111,7 @@ class IonUnroller(TransformationPass):
                 #  backend reports "measure", for example.
                 continue
             if node.name in [
-                "i",
+                "id",
                 "r",
                 "sx",
                 "sy",

@@ -27,7 +27,7 @@ def schedule_circuit(circ):
     when the process of scheduling creates such a nesting, it will automatically replace
     the inner block with every gate it contains.
 
-    :param ScheduledCircuit circ: The circuit to parallelize (in-place).
+    :param Circuit circ: The circuit to parallelize (in-place).
     """
     schedule_block(circ, circ.body)
 

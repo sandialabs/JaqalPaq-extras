@@ -6,9 +6,9 @@ from projectq.ops import (
     Rz,
     Rxx,
     Ryy,
-    X,
-    Y,
-    SqrtX,
+    XGate,
+    YGate,
+    SqrtXGate,
     FlushGate,
     Measure,
     Allocate,
@@ -28,15 +28,15 @@ import numpy as np
 
 one_qubit_gates = {
     Rx: lambda g, q: ("R", q, 0, normalize_angle(g.angle)),
-    Ry: lambda g, q: ("R", q, 90.0, normalize_angle(g.angle)),
+    Ry: lambda g, q: ("R", q, np.pi / 2, normalize_angle(g.angle)),
     Rz: lambda g, q: ("Rz", q, normalize_angle(g.angle)),
-    X: lambda g, q: ("Px", q),
-    Y: lambda g, q: ("Py", q),
-    SqrtX: lambda g, q: ("Sx", q),
+    XGate: lambda g, q: ("Px", q),
+    YGate: lambda g, q: ("Py", q),
+    SqrtXGate: lambda g, q: ("Sx", q),
 }
 two_qubit_gates = {
     Rxx: lambda g, q1, q2: ("MS", q1, q2, 0, normalize_angle(g.angle)),
-    Ryy: lambda g, q1, q2: ("MS", q1, q2, 90, normalize_angle(g.angle)),
+    Ryy: lambda g, q1, q2: ("MS", q1, q2, np.pi / 2, normalize_angle(g.angle)),
 }
 
 
@@ -66,7 +66,7 @@ def normalize_angle(p):
 class JaqalBackend(BasicEngine):
     """
     A ProjectQ backend that converts the input circuit to Jaqal, building a
-    :class:`jaqalpup.core.ScheduledCircuit` object which can be retrieved with the
+    :class:`jaqalpup.core.Circuit` object which can be retrieved with the
     :attr:`circuit` property. If an output file is supplied, it also writes the Jaqal
     code to it when the engine is flushed.
 
@@ -75,7 +75,7 @@ class JaqalBackend(BasicEngine):
     :param one_qubit_gate_map: A dictionary mapping ProjectQ gate classes to
         functions taking as arguments an instance of that class and a
         :class:`jaqalpup.core.NamedQubit` and returning a tuple of arguments for
-        :meth:`jaqalpup.core.ScheduledCircuit.build_gate`. Defaults to a mapping from
+        :meth:`jaqalpup.core.Circuit.build_gate`. Defaults to a mapping from
         :class:`projectq.ops.Rx`, :class:`projectq.ops.Ry`, :class:`projectq.ops.Rz`,
         :class:`projectq.ops.X`, :class:`projectq.ops.Y`, and :class:`projectq.ops.SqrtX`
         to their QSCOUT counterparts.
@@ -83,7 +83,7 @@ class JaqalBackend(BasicEngine):
     :param two_qubit_gate_map: A dictionary mapping ProjectQ gate classes to
         functions taking as arguments an instance of that class and two
         :class:`jaqalpup.core.NamedQubit` ojects and returning a tuple of arguments for
-        :meth:`jaqalpup.core.ScheduledCircuit.build_gate`. Defaults to a mapping from
+        :meth:`jaqalpup.core.Circuit.build_gate`. Defaults to a mapping from
         :class:`projectq.ops.Rxx` and :class:`projectq.ops.Ryy` to QSCOUT's
         Mølmer-Sørenson gate.
     :type two_qubit_gate_map: dict or None
@@ -105,9 +105,9 @@ class JaqalBackend(BasicEngine):
             native_gates = NATIVE_GATES
         self._circuit = CircuitBuilder(native_gates=native_gates)
         self._q = self._circuit.register("q", 0)
-        self._circuit.gate("prepare_all")
         self._block = UnscheduledBlockBuilder()
         self._circuit.expression.append(self._block.expression)
+        self._block.gate("prepare_all")
         self.measure_accumulator = set()
         self.reset_accumulator = set()
         self.outfile = outfile
@@ -182,7 +182,6 @@ class JaqalBackend(BasicEngine):
 
     def _store(self, cmd):
         gate = cmd.gate
-        print(gate)
 
         if len(self.measure_accumulator) == len(self._q) and len(self._q) > 0:
             self.measure_accumulator = set()

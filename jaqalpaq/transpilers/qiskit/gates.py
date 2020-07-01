@@ -13,12 +13,12 @@
 # that they have been altered from the originals.
 
 from qiskit.circuit import Gate, QuantumCircuit, QuantumRegister
-from qiskit.extensions.standard.u3 import U3Gate
-from qiskit.extensions.standard.cx import CnotGate
-from qiskit.extensions.standard.rx import RXGate
-from qiskit.extensions.standard.ry import RYGate
-from qiskit.extensions.standard.rz import RZGate
-from qiskit.extensions.standard.rxx import RXXGate
+from qiskit.circuit.library.standard_gates.u3 import U3Gate
+from qiskit.circuit.library.standard_gates.x import CnotGate
+from qiskit.circuit.library.standard_gates.rx import RXGate
+from qiskit.circuit.library.standard_gates.ry import RYGate
+from qiskit.circuit.library.standard_gates.rz import RZGate
+from qiskit.circuit.library.standard_gates.rxx import RXXGate
 from qiskit.qasm import pi
 
 

@@ -23,19 +23,19 @@ QISKIT_NAMES = {
 def jaqal_circuit_from_dag_circuit(dag):
     """
     Converts a Qiskit directed-acyclic-graph representation of a circuit to a
-    :class:`jaqalpaq.core.ScheduledCircuit`.
+    :class:`jaqalpaq.core.Circuit`.
     See :func:`jaqal_circuit_from_qiskit_circuit` for details.
 
     :param qiskit.dagcircuit.DAGCircuit dag: The directed acyclic graph circuit to convert.
     :returns: The same quantum circuit, converted to JaqalPaq.
-    :rtype: jaqalpaq.core.ScheduledCircuit
+    :rtype: jaqalpaq.core.Circuit
     """
-    return qscout_circuit_from_qiskit_circuit(dag_to_circuit(dag))
+    return jaqal_circuit_from_qiskit_circuit(dag_to_circuit(dag))
 
 
 def jaqal_circuit_from_qiskit_circuit(circuit, names=None, native_gates=None):
     """
-    Converts a Qiskit circuit to a :class:`jaqalpaq.core.ScheduledCircuit`. The circuit
+    Converts a Qiskit circuit to a :class:`jaqalpaq.core.Circuit`. The circuit
     will be structured into a sequence of unscheduled blocks. All instructions between one
     barrier statement and the next will be put into an unscheduled block together. If the
     :mod:`qscout.scheduler` is run on the circuit, as many as possible of those gates will
@@ -62,7 +62,7 @@ def jaqal_circuit_from_qiskit_circuit(circuit, names=None, native_gates=None):
         gates.
     :type native_gates: dict or None
     :returns: The same quantum circuit, converted to JaqalPaq.
-    :rtype: jaqalpaq.core.ScheduledCircuit
+    :rtype: jaqalpaq.core.Circuit
     :raises JaqalError: If any instruction acts on a qubit from a register other than the
         circuit's qregs.
     :raises JaqalError: If the circuit includes a snapshot instruction.
@@ -102,7 +102,9 @@ def jaqal_circuit_from_qiskit_circuit(circuit, names=None, native_gates=None):
             if instr[0].name == "reset":
                 target = instr[1][0]
                 if target.register.name in registers:
-                    reset_accumulator.add(target.resolve_qubit(target.index)[1])
+                    reset_accumulator.add(
+                        registers[target.register.name].resolve_qubit(target.index)[1]
+                    )
                 else:
                     raise JaqalError("Register %s invalid!" % target.register.name)
                 if len(reset_accumulator) == n:
@@ -119,7 +121,9 @@ def jaqal_circuit_from_qiskit_circuit(circuit, names=None, native_gates=None):
             if instr[0].name == "measure":
                 target = instr[1][0]
                 if target.register.name in registers:
-                    measure_accumulator.add(target.resolve_qubit(target.index)[1])
+                    measure_accumulator.add(
+                        registers[target.register.name].resolve_qubit(target.index)[1]
+                    )
                 else:
                     raise JaqalError("Register %s invalid!" % target.register.name)
                 if len(measure_accumulator) == n:
@@ -136,14 +140,25 @@ def jaqal_circuit_from_qiskit_circuit(circuit, names=None, native_gates=None):
             in_preamble = False
             target = instr[1][0]
             if target.register.name in registers:
-                reset_accumulator = {target.resolve_qubit(target.index)[1]}
+                measure_accumulator = {
+                    registers[target.register.name].resolve_qubit(target.index)[1]
+                }
+                if len(measure_accumulator) == n:
+                    block.gate("measure_all")
+                    measure_accumulator = {}
+                continue
             else:
                 raise JaqalError("Register %s invalid!" % target.register.name)
         elif instr[0].name == "reset":
             if not in_preamble:
                 target = instr[1][0]
                 if target.register.name in registers:
-                    reset_accumulator = {target.resolve_qubit(target.index)[1]}
+                    reset_accumulator = {
+                        registers[target.register.name].resolve_qubit(target.index)[1]
+                    }
+                    if len(reset_accumulator) == n:
+                        block.gate("prepare_all")
+                        reset_accumulator = {}
                 else:
                     raise JaqalError("Register %s invalid!" % target.register.name)
         elif instr[0].name == "barrier":
