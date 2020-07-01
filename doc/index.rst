@@ -7,15 +7,18 @@ Python Jaqal Programming Package (JaqalPaq)
 
 API Reference
 -------------
-JaqalPaq currently consists of the :mod:`jaqalpaq` Python package, and its subpackages:
+JaqalPaq currently consists of the :mod:`jaqalpaq` Python package, and its subpackages.
 
 * The :mod:`jaqalpaq.core` package implements an object representation of scheduled
   quantum circuits. It supports programmatically constructing and manipulating circuits.
-* The :mod:`jaqalpaq.parser` package parses Jaqal source files into :mod:`jaqalpaq.core`
-  :class:`ScheduledCircuit` objects.
+* The :mod:`jaqalpaq.parser` package parses Jaqal source files into
+  :class:`jaqalpaq.core.Circuit` objects.
 * The :mod:`jaqalpaq.generator` package generates Jaqal code that implements the
-  quantum circuit described by a :class:`ScheduledCircuit` object.
+  quantum circuit described by a :class:`jaqalpaq.core.Circuit` object.
 * The :mod:`jaqalpaq.emulator` package provides noiseless emulation of Jaqal code.
+
+The following subpackages are not part of the basic language features, and must be
+installed separately from the JaqalPaq-extras repository.
 * The :mod:`jaqalpaq.scheduler` package modifies circuits to execute more gates in
   parallel, without changing the function of the circuit or breaking the restrictions
   of the QSCOUT hardware.
