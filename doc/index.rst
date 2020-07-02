@@ -19,6 +19,7 @@ JaqalPaq currently consists of the :mod:`jaqalpaq` Python package, and its subpa
 
 The following subpackages are not part of the basic language features, and must be
 installed separately from the JaqalPaq-extras repository.
+
 * The :mod:`jaqalpaq.scheduler` package modifies circuits to execute more gates in
   parallel, without changing the function of the circuit or breaking the restrictions
   of the QSCOUT hardware.
