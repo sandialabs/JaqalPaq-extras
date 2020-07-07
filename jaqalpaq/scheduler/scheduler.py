@@ -55,6 +55,7 @@ class SchedulerVisitor(Visitor):
             self.all_qubits[reg.name] = set(range(reg.size))
 
         self.native_gates = circ.native_gates
+        self.body = circ.body
         new_circuit = Circuit(native_gates=circ.native_gates)
         new_circuit.constants.update(circ.constants)
         new_circuit.registers.update(circ.registers)
@@ -92,7 +93,7 @@ class SchedulerVisitor(Visitor):
         else:
             for instr in block:
                 if isinstance(instr, BlockStatement):
-                    if instr.parallel:
+                    if instr.parallel or block is self.body:
                         new_statements.append(self.visit(instr))
                     else:
                         new_statements.extend(self.visit(instr).statements)
@@ -181,8 +182,6 @@ class SchedulerVisitor(Visitor):
             return False  # Can't do macros in parallel, because they could include anything.
         if len(self.native_gates[sub_instr.name].quantum_parameters) > 1:
             return False  # Can't do multiple 2-qubit gates at once.
-        if sub_instr.name in ["prepare_all", "measure_all"]:
-            return False  # Can't do gates while preparing or measuring ions.
         return True
 
 
