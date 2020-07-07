@@ -108,7 +108,6 @@ def convert_command(
     if remaps is None:
         remaps = range(n)
     op_type = command.op.type
-    print(op_type)
     if measure_accumulator:
         if op_type == OpType.Measure:
             qb = command.qubits[0]

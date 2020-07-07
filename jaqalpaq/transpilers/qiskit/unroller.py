@@ -139,7 +139,6 @@ class IonUnroller(TransformationPass):
                     "Cannot unroll the circuit to trapped ion gates. "
                     "No rule to expand instruction %s." % node.op.name
                 )
-            print(rule)
 
             # hacky way to build a dag on the same register as the rule is defined
             # TODO: need anonymous rules to address wires by index
