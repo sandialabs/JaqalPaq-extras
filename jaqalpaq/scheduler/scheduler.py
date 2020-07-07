@@ -73,7 +73,6 @@ class SchedulerVisitor(Visitor):
             }
             for instr in block:
                 self.schedule_instr(instr, new_statements, freeze_timestamps)
-                print(new_statements, freeze_timestamps)
             for moment in range(len(new_statements)):
                 if isinstance(new_statements[moment], list):
                     if len(new_statements[moment]) > 1:
