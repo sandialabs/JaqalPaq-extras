@@ -8,8 +8,6 @@ from .frontend import (
 )
 from .gates import MSGate, SYGate, SYdgGate, JaqalRGate
 
-# from .unroller import IonUnroller
-
 __all__ = [
     "jaqal_circuit_from_dag_circuit",
     "jaqal_circuit_from_qiskit_circuit",
@@ -18,5 +16,5 @@ __all__ = [
     "SYGate",
     "SYdgGate",
     "JaqalRGate",
-    #    "IonUnroller",
+    "get_ion_instance",
 ]
