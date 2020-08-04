@@ -5,11 +5,13 @@ from setuptools import setup
 
 name = "JaqalPaq-extras"
 description = "Python tools for Jaqal (extras)"
-version = "1.0"
+version = "1.0.0b0"
 
 setup(
     name=name,
     description=description,
+    long_description=open("README.md", "r").read(),
+    long_description_content_type="text/markdown",
     version=version,
     author="Benjamin C. A. Morrison, Jay Wesley Van Der Wall, Daniel Lobser, Antonio Russo, Kenneth Rudinger, Peter Maunz",
     author_email="qscout@sandia.gov",
@@ -29,10 +31,10 @@ setup(
     platforms=["any"],
     url="https://qscout.sandia.gov",
     classifiers=[
-        "Development Status :: 2 - Pre-Alpha",
+        "Development Status :: 4 - Beta",
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: Apache Software License",
-        "Programming Language :: Python",
+        "Programming Language :: Python :: 3",
         "Topic :: Scientific/Engineering :: Physics",
         "Operating System :: Microsoft :: Windows",
         "Operating System :: MacOS :: MacOS X",
