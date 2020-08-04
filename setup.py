@@ -1,7 +1,7 @@
 """Python tools for Jaqal (extras)"""
 
 import sys
-from setuptools import setup
+from setuptools import setup, find_packages
 
 name = "JaqalPaq-extras"
 description = "Python tools for Jaqal (extras)"
@@ -15,15 +15,13 @@ setup(
     version=version,
     author="Benjamin C. A. Morrison, Jay Wesley Van Der Wall, Daniel Lobser, Antonio Russo, Kenneth Rudinger, Peter Maunz",
     author_email="qscout@sandia.gov",
-    packages=[
-        "jaqalpaq.scheduler",
-        "jaqalpaq.transpilers",
-        "jaqalpaq.transpilers.cirq",
-        "jaqalpaq.transpilers.projectq",
-        "jaqalpaq.transpilers.qiskit",
-        "jaqalpaq.transpilers.quil",
-        "jaqalpaq.transpilers.tket",
-    ],
+    packages=find_packages(
+        include=[
+            "jaqalpaq.scheduler",
+            "jaqalpaq.transpilers",
+            "jaqalpaq.transpilers.*",
+        ]
+    ),
     package_dir={"": "."},
     install_requires=["JaqalPaq"],
     extras_requires={"tests": ["pytest"],},
