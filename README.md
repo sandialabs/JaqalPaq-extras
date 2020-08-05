@@ -1,20 +1,58 @@
-# Python Jaqal Programming Package (JaqalPaq) Extras
-This repository contains extensions to JaqalPaq that may be useful for
-users.  Support is provided on a "best effort" basis, and quality cannot be
-guaranteed.  The primary content is compatibility with other Quantum
-programming toolsets, including transpiling.  In particular, we include
-* The ability to automatically schedule gates in an efficient (but not
-  necessarily optimal) manner given an unscheduled program.
-* The ability to decompose arbitrary unitary operations into native ion-trap
-  gates.
-* The ability to convert the data structures used by many other quantum
-  software toolchains to our internal representation. Ideally this will
-  include:
-    * IBM's Qiskit
-    * Rigetti's pyquil
-    * Google's Cirq
-    * Microsoft's Q#
-    * ETH Zurich's ProjectQ
-    * CQC's t|ket>
-* Extensions to some or all of the above toolchains to properly support
-  ion-based quantum computation, as needed.
+# JaqalPaq-Extras
+JaqalPaq-Extras contains extensions to the [JaqalPaq](https://gitlab.com/jaqal/jaqalpaq/) python package, which itself is used to parse, manipulate, emulate, and generate quantum assembly code written in
+[Jaqal](https://qscout.sandia.gov/jaqal) (Just another quantum assembly
+language).  The purpose of JaqalPaq-Extras is to facilitate the conversion of programs written in other quantum assembly languages into Jaqal circuit objects in JaqalPaq.  JaqalPaq-Extras is supported on a "best effort" basis, and quality cannot be guaranteed.
+
+Because some other quantum assembly languages do not support explicit scheduling like Jaqal does, JaqalPaq-Extras also contains some basic quantum circuit scheduling routines.  Furthermore, to facilitate execution on the [QSCOUT](https://qscout.sandia.gov/) (Quantum Scientific Computing Open User Testbed) platform, JaqalPaq-Extras also includes extensions for third-party quantum software toolchains that support the QSCOUT hardware model (including its native gate set and scheduling constraints).  In summary, JaqalPaq-Extras contains the following functionalities:
+
+
+* Conversion of quantum assembly data structures into JaqalPaq circuit objects from:
+    * IBM's [Qiskit](https://github.com/Qiskit)
+    * Rigetti's [pyquil](https://github.com/rigetti/pyquil)
+    * Google's [Cirq](https://github.com/quantumlib/Cirq)
+    * ETH Zurich's [ProjectQ](https://github.com/ProjectQ-Framework/ProjectQ)
+    * CQC's [pytket](https://github.com/CQCL/pytket)
+* Basic routines for scheduling unscheduled quantum assembly programs.
+* Extensions to these packages above, as needed, to support to the QSCOUT hardware model.
+
+## Installation
+
+JaqalPaq-Extras is available on [GitLab](https://gitlab.com/jaqal/jaqalpaq-extras).  It requires JaqalPaq to be installed first, which is also  available on [GitLab](https://gitlab.com/jaqal/jaqalpaq).  JaqalPaq-Extras requires JaqalPaq itself be installed first.
+Both JaqalPaq and its extensions can be installed with [pip](https://pip.pypa.io/en/stable/):
+
+```bash
+pip install jaqalpaq
+pip install jaqalpaq-extras
+```
+
+If only the scheduler will be used, there are no other dependencies.
+However, to make use of the transpiler subpackages, one or more other software toolchains
+must be installed. As of this writing, all five supported toolchains can be installed via
+pip as follows, with the supported versions of these packages indicated:
+
+```bash
+pip install qiskit>=0.19.0,<0.20.0
+pip install pyquil>=2.21.0,<3.0.0
+pip install cirq>=0.8.2,<0.9.0
+pip install projectq>=0.5.1,<0.6.0
+pip install pytket>=0.5.6,<0.6.0
+```
+
+Additionally, a gate-set specification is required for all of the transpiler subpackages.
+Currently, we provide the QSCOUT native gate models, which is also available on [GitLab](https://gitlab.com/jaqal/qscout-gatemodels/) and can be installed via [pip](https://pip.pypa.io/en/stable/):
+
+```bash
+pip install qscout-gatemodels
+```
+
+## Documentation
+
+Online documentation is hosted on [Read the Docs](https://jaqalpaq.readthedocs.io).
+
+
+## License
+[Apache 2.0](https://choosealicense.com/licenses/apache-2.0/)
+
+## Questions?
+
+For help and support, please contact [qscout@sandia.gov](mailto:qscout@sandia.gov).
