@@ -2,9 +2,7 @@ image: python:3.7
 
 before_script:
   - python --version
-  - export http_proxy=http://wwwproxy.sandia.gov:80
-  - export https_proxy=https://wwwproxy.sandia.gov:80
-  - export no_proxy=.sandia.gov
+  - echo "$CI_PROJECT_URL" | grep -q gitlab.sandia.gov && export http_proxy=http://wwwproxy.sandia.gov:80 https_proxy=https://wwwproxy.sandia.gov:80 no_proxy=.sandia.gov
 
 stages:
   - Static Analysis
@@ -21,6 +19,6 @@ syntax:
 pytest:
   stage: Test
   script:
-    - ( unset https_proxy ; cd .. && rm -fr jaqalpaq && git clone --depth 1 https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.sandia.gov/jaqal/jaqalpaq.git/  )
+    - ( unset https_proxy ; cd .. && rm -fr jaqalpaq && git clone --depth 1 "$(echo "${CI_REPOSITORY_URL}" | sed 's/jaqalpaq-extras.git/jaqalpaq.git/' )" )
     - ( cd ../jaqalpaq && pip install -e .[tests] )
     - pip install -e . && pytest
