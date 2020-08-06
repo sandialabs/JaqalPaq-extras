@@ -1,3 +1,6 @@
+# Copyright 2020 National Technology & Engineering Solutions of Sandia, LLC (NTESS).
+# Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains
+# certain rights in this software.
 # The below IonUnroller class is a derivative work of Qiskit's Unroller class. It has been altered from the original.
 
 # This code is part of Qiskit.
