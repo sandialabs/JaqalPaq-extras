@@ -174,7 +174,8 @@ def convert_command(
                 qb_targets.append(registers[qb.reg_name][remaps[qb.index[0]]])
         block.gate(
             *names[op_type](
-                *qb_targets, *[float(param) * np.pi for param in command.op.params],
+                *qb_targets,
+                *[float(param) * np.pi for param in command.op.params],
             )
         )
     else:

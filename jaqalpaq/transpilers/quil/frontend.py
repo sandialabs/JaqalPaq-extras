@@ -65,7 +65,7 @@ def quil_gates(native_gates=None):
         # parametrized ones to be functions that return matrices.
         quil_name = gate.name.upper()
         classical_count = len(gate.classical_parameters)
-        if classical_count == 0:
+        if classical_count != 0:
             gates[quil_name] = (
                 lambda quil_name, classical_count: (
                     lambda *args: Gate(
