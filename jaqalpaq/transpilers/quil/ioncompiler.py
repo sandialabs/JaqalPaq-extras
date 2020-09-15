@@ -47,7 +47,6 @@ class IonCompiler(AbstractCompiler):
         for gate in self.native_gates:
             if gate.name.upper() not in self.names:
                 self.names[gate.name.upper()] = gate.name
-        print(self.names)
 
     def quil_to_native_quil(self, program: Program, *, protoquil=None) -> Program:
         """

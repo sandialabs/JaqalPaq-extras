@@ -28,7 +28,7 @@ from qiskit.circuit.library.standard_gates.rx import RXGate
 from qiskit.circuit.library.standard_gates.ry import RYGate
 from qiskit.circuit.library.standard_gates.rz import RZGate
 from qiskit.circuit import QuantumRegister
-from .gates import MSGate, SXGate, SYGate, RGate
+from .gates import MSGate, SXGate, SXDGate, SYGate, SYDGate, RGate
 
 
 class IonUnroller(TransformationPass):
@@ -68,7 +68,7 @@ class IonUnroller(TransformationPass):
             # }
             rule = [
                 (SYGate(), [q[0]], []),
-                (MSGate(pi / 2, 0), [q[0], q[1]], []),
+                (MSGate(0, pi / 2), [q[0], q[1]], []),
                 (RXGate(-pi / 2), [q[0]], []),
                 (RXGate(-pi / 2), [q[1]], []),
                 (RYGate(-pi / 2), [q[0]], []),
@@ -78,6 +78,8 @@ class IonUnroller(TransformationPass):
                 rule = [(XGate(), [q[0]], [])]
             elif node.op.params[0] == pi / 2:
                 rule = [(SXGate(), [q[0]], [])]
+            elif node.op.params[0] == -pi / 2:
+                rule = [(SXDGate(), [q[0]], [])]
             else:
                 rule = [(RGate(0, node.op.params[0]), [q[0]], [])]
         elif node.name == "h":
@@ -90,6 +92,8 @@ class IonUnroller(TransformationPass):
                 rule = [(YGate(), [q[0]], [])]
             elif node.op.params[0] == pi / 2:
                 rule = [(SYGate(), [q[0]], [])]
+            elif node.op.params[0] == -pi / 2:
+                rule = [(SYDGate(), [q[0]], [])]
             else:
                 rule = [(RGate(pi / 2, node.op.params[0]), [q[0]], [])]
         else:
@@ -117,7 +121,9 @@ class IonUnroller(TransformationPass):
                 "id",
                 "r",
                 "sx",
+                "sxd",
                 "sy",
+                "syd",
                 "x",
                 "y",
                 "rz",

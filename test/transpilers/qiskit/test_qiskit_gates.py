@@ -4,7 +4,7 @@ import jaqalpaq
 
 qiskit = pytest.importorskip("qiskit")
 
-from jaqalpaq.transpilers.qiskit import MSGate, SXGate, SYGate, RGate
+from jaqalpaq.transpilers.qiskit import MSGate, SXGate, SXDGate, SYGate, SYDGate, RGate
 from qiskit.circuit import QuantumCircuit, QuantumRegister
 from math import pi
 
@@ -31,9 +31,23 @@ class QiskitGateTester(unittest.TestCase):
         gates = [inst[0].name for inst in circ.decompose()]
         self.assertEqual(gates, ["rx"])
 
-    def test_stgate(self):
+    def test_sxdgate(self):
+        qr = QuantumRegister(1)
+        circ = QuantumCircuit(qr)
+        circ.sxd(qr[0])
+        gates = [inst[0].name for inst in circ.decompose()]
+        self.assertEqual(gates, ["rx"])
+
+    def test_sygate(self):
         qr = QuantumRegister(1)
         circ = QuantumCircuit(qr)
         circ.sy(qr[0])
+        gates = [inst[0].name for inst in circ.decompose()]
+        self.assertEqual(gates, ["ry"])
+
+    def test_sydgate(self):
+        qr = QuantumRegister(1)
+        circ = QuantumCircuit(qr)
+        circ.syd(qr[0])
         gates = [inst[0].name for inst in circ.decompose()]
         self.assertEqual(gates, ["ry"])

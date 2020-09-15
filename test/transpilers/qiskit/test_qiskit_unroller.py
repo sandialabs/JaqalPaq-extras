@@ -4,7 +4,15 @@ import jaqalpaq
 
 qiskit = pytest.importorskip("qiskit")
 
-from jaqalpaq.transpilers.qiskit import MSGate, SXGate, SYGate, RGate, IonUnroller
+from jaqalpaq.transpilers.qiskit import (
+    MSGate,
+    SXGate,
+    SXDGate,
+    SYGate,
+    SYDGate,
+    RGate,
+    IonUnroller,
+)
 from qiskit.circuit import QuantumCircuit, QuantumRegister, ClassicalRegister
 from qiskit.transpiler import PassManager
 from math import pi
@@ -20,8 +28,9 @@ class QiskitUnrollerTester(unittest.TestCase):
         circ.x(qr[1])
         circ.y(qr[0])
         circ.sx(qr[0])
+        circ.sxd(qr[0])
         circ.sy(qr[1])
-        circ.i(qr[0])
+        circ.syd(qr[1])
         circ.measure(qr, cr)
         unrolled = pass_manager = PassManager([IonUnroller()]).run(
             circ, output_name=circ.name + " unrolled"
@@ -117,9 +126,9 @@ class QiskitUnrollerTester(unittest.TestCase):
         )
         c2 = QuantumCircuit(qr)
         c2.sy(qr[0])
-        c2.ms2(pi / 2, 0, qr[0], qr[1])
-        c2.r(0, -pi / 2, qr[0])
-        c2.r(0, -pi / 2, qr[1])
-        c2.r(pi / 2, -pi / 2, qr[0])
+        c2.ms2(0, pi / 2, qr[0], qr[1])
+        c2.sxd(qr[0])
+        c2.sxd(qr[1])
+        c2.syd(qr[0])
         self.maxDiff = 2000
         self.assertEqual(str(c2.draw()), str(unrolled.draw()))

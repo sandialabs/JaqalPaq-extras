@@ -12,10 +12,11 @@ from jaqalpaq import JaqalError
 import numpy as np
 
 QISKIT_NAMES = {
-    "i": "I",
     "r": "R",
     "sx": "Sx",
+    "sxd": "Sxd",
     "sy": "Sy",
+    "syd": "Syd",
     "x": "Px",
     "y": "Py",
     "rz": "Rz",
@@ -57,7 +58,7 @@ def jaqal_circuit_from_qiskit_circuit(circuit, names=None, native_gates=None):
 
     :param qiskit.circuit.QuantumCircuit circuit: The circuit to convert.
     :param names: A mapping from names of Qiskit gates to the corresponding native Jaqal
-        gate names. If omitted, maps i, r (:class:`jaqalpaq.transpilers.qiskit.RGate`),
+        gate names. If omitted, maps r (:class:`jaqalpaq.transpilers.qiskit.RGate`),
         sx (:class:`jaqalpaq.qiskit.SXGate`), sy (:class:`jaqalpaq.qiskit.SYGate`), x, y,
         rz, and ms2 (:class:`jaqalpaq.qiskit.MSGate`) to their QSCOUT counterparts.
     :type names: dict or None

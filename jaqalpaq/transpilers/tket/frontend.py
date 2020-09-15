@@ -14,7 +14,7 @@ import numpy as np
 from jaqalpaq import JaqalError
 
 TKET_NAMES = {
-    OpType.PhasedX: lambda q, alpha, beta: ("R", q, alpha, -beta),
+    OpType.PhasedX: lambda q, alpha, beta: ("R", q, beta, alpha),
     OpType.Rz: lambda q, theta: ("Rz", q, theta),
     OpType.XXPhase: lambda q1, q2, theta: ("MS", q1, q2, 0, theta),
 }

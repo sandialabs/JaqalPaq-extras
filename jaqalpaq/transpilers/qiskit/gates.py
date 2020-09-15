@@ -34,7 +34,7 @@ class MSGate(Gate):
 
     or to the OpenQASM sequence ::
 
-        gate ms2(theta, phi) a,b
+        gate ms2(phi, theta) a,b
         {
         rz(phi) a;
         rz(phi+pi/2) b;
@@ -48,18 +48,18 @@ class MSGate(Gate):
         rz(-phi) b;
         }
 
-    :param float theta: The angle by which the gate rotates the state.
     :param float phi: The phase angle determining the mix of XX and YY rotation.
+    :param float theta: The angle by which the gate rotates the state.
     :param label: What to label the gate on, e.g., circuit diagrams.
     :type label: str or None
     """
 
-    def __init__(self, theta, phi, label=None):
-        super().__init__("ms2", 2, [theta, phi], label=label)
+    def __init__(self, phi, theta, label=None):
+        super().__init__("ms2", 2, [phi, theta], label=label)
 
     def _define(self):
         """
-        gate ms2(theta, phi) a,b
+        gate ms2(phi, theta) a,b
         {
         rz(phi) a;
         rz(phi+pi/2) b;
@@ -75,7 +75,7 @@ class MSGate(Gate):
         """
         definition = []
         q = QuantumRegister(2, "q")
-        theta, phi = tuple(self.params)
+        phi, theta = tuple(self.params)
         #         rule = [
         #             (U3Gate(0, 0, phi), [q[0]], []),
         #             (U3Gate(0, 0, phi+pi/2), [q[1]], []),
@@ -100,8 +100,8 @@ class MSGate(Gate):
         self.definition = definition
 
 
-def ms2(self, theta, phi, a, b):
-    return self.append(MSGate(theta, phi), [a, b], [])
+def ms2(self, phi, theta, a, b):
+    return self.append(MSGate(phi, theta), [a, b], [])
 
 
 QuantumCircuit.ms2 = ms2
@@ -143,6 +143,42 @@ def sx(self, q):
 QuantumCircuit.sx = sx
 
 
+class SXDGate(Gate):
+    """
+    The inverse `sqrt(X)` gate, as implemented on QSCOUT hardware. It's equivalent to a
+    `-pi/2` rotation around the X-axis on the Bloch sphere.
+
+    :param label: What to label the gate on, e.g., circuit diagrams.
+    :type label: str or None
+    """
+
+    def __init__(self, label=None):
+        super().__init__("sxd", 1, [], label=label)
+
+    def _define(self):
+        """
+        gate sxd a
+        {
+        rx(-pi/2) a;
+        }
+        """
+        definition = []
+        q = QuantumRegister(1, "q")
+        rule = [
+            (RXGate(-pi / 2), [q[0]], []),
+        ]
+        for inst in rule:
+            definition.append(inst)
+        self.definition = definition
+
+
+def sxd(self, q):
+    return self.append(SXDGate(), [q], [])
+
+
+QuantumCircuit.sxd = sxd
+
+
 class SYGate(Gate):
     """
     The `sqrt(Y)` gate, as implemented on QSCOUT hardware. It's equivalent to a `pi/2`
@@ -179,17 +215,53 @@ def sy(self, q):
 QuantumCircuit.sy = sy
 
 
+class SYDGate(Gate):
+    """
+    The inverse `sqrt(Y)` gate, as implemented on QSCOUT hardware. It's equivalent to a
+    `-pi/2` rotation around the Y-axis on the Bloch sphere.
+
+    :param label: What to label the gate on, e.g., circuit diagrams.
+    :type label: str or None
+    """
+
+    def __init__(self, label=None):
+        super().__init__("syd", 1, [], label=label)
+
+    def _define(self):
+        """
+        gate syd a
+        {
+        ry(-pi/2) a;
+        }
+        """
+        definition = []
+        q = QuantumRegister(1, "q")
+        rule = [
+            (RYGate(-pi / 2), [q[0]], []),
+        ]
+        for inst in rule:
+            definition.append(inst)
+        self.definition = definition
+
+
+def syd(self, q):
+    return self.append(SYDGate(), [q], [])
+
+
+QuantumCircuit.syd = syd
+
+
 class RGate(Gate):
     """
     A single-qubit gate representing arbitrary rotation around an axis in the X-Y plane,
     as implemented on QSCOUT hardware. Note that this is essentially a different
     parametrization of Qiskit's U2 gate. It's equivalent to the OpenQASM sequence ::
 
-        gate r(theta, phi) a
+        gate r(axis_angle, rotation_angle) a
         {
-        rz(-theta) a;
-        rx(phi) a;
-        rz(theta) a;
+        rz(-axis_angle) a;
+        rx(rotation_angle) a;
+        rz(axis_angle) a;
         }
 
     :param float axis_angle: The angle that sets the planar axis to rotate around.
@@ -203,28 +275,28 @@ class RGate(Gate):
 
     def _define(self):
         """
-        gate r(theta, phi) a
+        gate r(axis_angle, rotation_angle) a
         {
-        rz(-theta) a;
-        rx(phi) a;
-        rz(theta) a;
+        rz(-axis_angle) a;
+        rx(rotation_angle) a;
+        rz(axis_angle) a;
         }
         """
         definition = []
         q = QuantumRegister(1, "q")
-        theta, phi = tuple(self.params)
+        axis_angle, rotation_angle = tuple(self.params)
         rule = [
-            (RZGate(-theta), [q[0]], []),
-            (RXGate(phi), [q[0]], []),
-            (RZGate(theta), [q[0]], []),
+            (RZGate(-axis_angle), [q[0]], []),
+            (RXGate(rotation_angle), [q[0]], []),
+            (RZGate(axis_angle), [q[0]], []),
         ]
         for inst in rule:
             definition.append(inst)
         self.definition = definition
 
 
-def r(self, theta, phi, q):
-    return self.append(RGate(theta, phi), [q], [])
+def r(self, axis_angle, rotation_angle, q):
+    return self.append(RGate(axis_angle, rotation_angle), [q], [])
 
 
 QuantumCircuit.r = r
