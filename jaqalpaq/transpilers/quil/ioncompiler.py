@@ -44,9 +44,9 @@ class IonCompiler(AbstractCompiler):
             from qscout.v1.std import NATIVE_GATES
 
             self.native_gates = NATIVE_GATES
-        for gate in self.native_gates:
-            if gate.name.upper() not in self.names:
-                self.names[gate.name.upper()] = gate.name
+        for gate_name in self.native_gates:
+            if gate_name.upper() not in self.names:
+                self.names[gate_name.upper()] = gate_name
 
     def quil_to_native_quil(self, program: Program, *, protoquil=None) -> Program:
         """

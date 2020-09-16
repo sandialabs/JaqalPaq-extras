@@ -59,12 +59,10 @@ def quil_gates(native_gates=None):
     gates = {}
 
     for gate in native_gates:
-        if gate.ideal_unitary is None:
+        if native_gates[gate].ideal_unitary is None:
             continue
-        # pyquil expects non-parametrized gates to be matrices and
-        # parametrized ones to be functions that return matrices.
-        quil_name = gate.name.upper()
-        classical_count = len(gate.classical_parameters)
+        quil_name = gate.upper()
+        classical_count = len(native_gates[gate].classical_parameters)
         if classical_count != 0:
             gates[quil_name] = (
                 lambda quil_name, classical_count: (
