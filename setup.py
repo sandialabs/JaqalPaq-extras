@@ -20,9 +20,10 @@ setup(
             "jaqalpaq.scheduler",
             "jaqalpaq.transpilers",
             "jaqalpaq.transpilers.*",
-        ]
+        ],
+        where="src",
     ),
-    package_dir={"": "."},
+    package_dir={"": "src"},
     install_requires=[f"JaqalPaq=={version}"],
     extras_require={
         "tests": ["pytest"],
