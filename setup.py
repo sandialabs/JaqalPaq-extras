@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 name = "JaqalPaq-extras"
 description = "Python tools for Jaqal (extras)"
-version = "1.0.0b1"
+version = "1.0.0rc1"
 
 setup(
     name=name,
