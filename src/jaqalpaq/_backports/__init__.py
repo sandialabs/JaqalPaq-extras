@@ -24,3 +24,10 @@ except ImportError:
         __all__.append("interpygate")
 else:
     __all__.append("interpygate")
+
+try:
+    import pygsti
+except ImportError:
+    pass
+else:
+    from . import _basisconstructors
