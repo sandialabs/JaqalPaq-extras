@@ -26,6 +26,8 @@ find "${backport_dst}/_interpygate" -iname '*.py' -exec sed \
     -e 's/\(\(target_\(op\|factory\)\|base_interpolator\|= self\)\.num_params\)/\1()/' \
     -e '/^ *@property/{N; s/^ *@property *\n\( *def num_params(\)/\1/ }' \
     -e 's/\(_op\.to\)_\(dense\)/\1\2/' \
+    -e 's/^\(import numpy as _np\)$/\1 ; import scipy.linalg as _spl/' \
+    -e 's/_ot\.error_generator(\([^,]*\), \([^,]*\), "pp", "logGTi-quick")/_np.real(_spl.logm(_np.dot(\1, _spl.inv(\2))))/' \
     -i {} \;
 
 git add "${backport_dst}/_interpygate"
