@@ -46,6 +46,10 @@ QISKIT_NAMES = {
     "ms2": "MS",
 }
 
+PARAM_MAPS = {
+    "*": lambda targets, args: args,
+}
+
 
 def jaqal_circuit_from_dag_circuit(dag):
     """
@@ -60,7 +64,7 @@ def jaqal_circuit_from_dag_circuit(dag):
     return jaqal_circuit_from_qiskit_circuit(dag_to_circuit(dag))
 
 
-def jaqal_circuit_from_qiskit_circuit(circuit, names=None, native_gates=None):
+def jaqal_circuit_from_qiskit_circuit(circuit, names=None, native_gates=None, param_maps=None):
     """
     Converts a Qiskit circuit to a :class:`jaqalpaq.core.Circuit`. The circuit
     will be structured into a sequence of unscheduled blocks. All instructions between one
@@ -105,6 +109,8 @@ def jaqal_circuit_from_qiskit_circuit(circuit, names=None, native_gates=None):
     qsc = CircuitBuilder(native_gates=native_gates)
     if names is None:
         names = QISKIT_NAMES
+    if param_maps is None:
+    	param_maps = PARAM_MAPS
     baseregister = qsc.register("baseregister", n)
     offset = 0
     registers = {}
@@ -198,6 +204,10 @@ def jaqal_circuit_from_qiskit_circuit(circuit, names=None, native_gates=None):
             )
         elif instr[0].name in names:
             in_preamble = False
+            if instr[0].name in param_maps:
+            	param_map = param_maps[instr[0].name]
+            else:
+            	param_map = param_maps['*']
             targets = instr[1]
             for target in targets:
                 if target.register.name not in registers:
@@ -205,7 +215,7 @@ def jaqal_circuit_from_qiskit_circuit(circuit, names=None, native_gates=None):
             block.gate(
                 names[instr[0].name],
                 *[registers[target.register.name][target.index] for target in targets],
-                *[float(param) for param in instr[0].params]
+                *param_map(targets, (float(param) for param in instr[0].params))
             )
         else:
             raise JaqalError(

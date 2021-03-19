@@ -28,6 +28,9 @@ class IonResult:
 
 
 class IonInstance(QuantumInstance):
+    def __init__(self, backend, names=None, native_gates=None, param_maps=None, **kwargs):
+        super().__init__(backend, **kwargs)
+        self.transpiler_args = {"names":names, "native_gates":native_gates, "param_maps":param_maps}
     def transpile(self, circuits):
         if isinstance(circuits, list):
             return [
@@ -42,7 +45,7 @@ class IonInstance(QuantumInstance):
             circuits = self.transpile(circuits)
         counts = {}
         for circuit in circuits:
-            jcircuit = jaqal_circuit_from_qiskit_circuit(circuit)
+            jcircuit = jaqal_circuit_from_qiskit_circuit(circuit, **self.transpiler_args)
             results = run_jaqal_circuit(jcircuit)
             probs = np.array(results.subcircuits[0].probability_by_int)
             qubits = len(circuit.qubits)
