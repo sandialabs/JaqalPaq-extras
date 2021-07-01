@@ -2,7 +2,7 @@ image: python:3.7
 
 before_script:
   - python --version
-  - echo "$CI_PROJECT_URL" | grep -q cee-gitlab.sandia.gov && INDEX="-i https://nexus.web.sandia.gov/repository/pypi-proxy/simple"
+  - echo "$CI_PROJECT_URL" | grep -q cee-gitlab.sandia.gov && INDEX="-i https://nexus.web.sandia.gov/repository/pypi-proxy/simple" && unset https_proxy http_proxy
 
 stages:
   - Analysis and Tests
