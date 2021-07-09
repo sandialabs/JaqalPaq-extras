@@ -17,7 +17,6 @@
 
 from qiskit.circuit import Gate, QuantumCircuit, QuantumRegister
 from qiskit.circuit.library.standard_gates.u3 import U3Gate
-from qiskit.circuit.library.standard_gates.x import CnotGate
 from qiskit.circuit.library.standard_gates.rx import RXGate
 from qiskit.circuit.library.standard_gates.ry import RYGate
 from qiskit.circuit.library.standard_gates.rz import RZGate
@@ -73,8 +72,8 @@ class MSGate(Gate):
         rz(-phi) b;
         }
         """
-        definition = []
         q = QuantumRegister(2, "q")
+        qc = QuantumCircuit(q, name=self.name)
         phi, theta = tuple(self.params)
         #         rule = [
         #             (U3Gate(0, 0, phi), [q[0]], []),
@@ -96,8 +95,8 @@ class MSGate(Gate):
             (U3Gate(0, 0, -phi), [q[1]], []),
         ]
         for inst in rule:
-            definition.append(inst)
-        self.definition = definition
+            qc._append(*inst)
+        self.definition = qc
 
 
 def ms2(self, phi, theta, a, b):
@@ -105,78 +104,6 @@ def ms2(self, phi, theta, a, b):
 
 
 QuantumCircuit.ms2 = ms2
-
-
-class SXGate(Gate):
-    """
-    The `sqrt(X)` gate, as implemented on QSCOUT hardware. It's equivalent to a `pi/2`
-    rotation around the X-axis on the Bloch sphere.
-
-    :param label: What to label the gate on, e.g., circuit diagrams.
-    :type label: str or None
-    """
-
-    def __init__(self, label=None):
-        super().__init__("sx", 1, [], label=label)
-
-    def _define(self):
-        """
-        gate sx a
-        {
-        rx(pi/2) a;
-        }
-        """
-        definition = []
-        q = QuantumRegister(1, "q")
-        rule = [
-            (RXGate(pi / 2), [q[0]], []),
-        ]
-        for inst in rule:
-            definition.append(inst)
-        self.definition = definition
-
-
-def sx(self, q):
-    return self.append(SXGate(), [q], [])
-
-
-QuantumCircuit.sx = sx
-
-
-class SXDGate(Gate):
-    """
-    The inverse `sqrt(X)` gate, as implemented on QSCOUT hardware. It's equivalent to a
-    `-pi/2` rotation around the X-axis on the Bloch sphere.
-
-    :param label: What to label the gate on, e.g., circuit diagrams.
-    :type label: str or None
-    """
-
-    def __init__(self, label=None):
-        super().__init__("sxd", 1, [], label=label)
-
-    def _define(self):
-        """
-        gate sxd a
-        {
-        rx(-pi/2) a;
-        }
-        """
-        definition = []
-        q = QuantumRegister(1, "q")
-        rule = [
-            (RXGate(-pi / 2), [q[0]], []),
-        ]
-        for inst in rule:
-            definition.append(inst)
-        self.definition = definition
-
-
-def sxd(self, q):
-    return self.append(SXDGate(), [q], [])
-
-
-QuantumCircuit.sxd = sxd
 
 
 class SYGate(Gate):
@@ -198,14 +125,14 @@ class SYGate(Gate):
         ry(pi/2) a;
         }
         """
-        definition = []
         q = QuantumRegister(1, "q")
+        qc = QuantumCircuit(q, name=self.name)
         rule = [
             (RYGate(pi / 2), [q[0]], []),
         ]
         for inst in rule:
-            definition.append(inst)
-        self.definition = definition
+            qc._append(*inst)
+        self.definition = qc
 
 
 def sy(self, q):
@@ -215,7 +142,7 @@ def sy(self, q):
 QuantumCircuit.sy = sy
 
 
-class SYDGate(Gate):
+class SYdgGate(Gate):
     """
     The inverse `sqrt(Y)` gate, as implemented on QSCOUT hardware. It's equivalent to a
     `-pi/2` rotation around the Y-axis on the Bloch sphere.
@@ -225,33 +152,33 @@ class SYDGate(Gate):
     """
 
     def __init__(self, label=None):
-        super().__init__("syd", 1, [], label=label)
+        super().__init__("sydg", 1, [], label=label)
 
     def _define(self):
         """
-        gate syd a
+        gate sydg a
         {
         ry(-pi/2) a;
         }
         """
-        definition = []
         q = QuantumRegister(1, "q")
+        qc = QuantumCircuit(q, name=self.name)
         rule = [
             (RYGate(-pi / 2), [q[0]], []),
         ]
         for inst in rule:
-            definition.append(inst)
-        self.definition = definition
+            qc._append(*inst)
+        self.definition = qc
 
 
-def syd(self, q):
-    return self.append(SYDGate(), [q], [])
+def sydg(self, q):
+    return self.append(SYdgGate(), [q], [])
 
 
-QuantumCircuit.syd = syd
+QuantumCircuit.sydg = sydg
 
 
-class RGate(Gate):
+class JaqalRGate(Gate):
     """
     A single-qubit gate representing arbitrary rotation around an axis in the X-Y plane,
     as implemented on QSCOUT hardware. Note that this is essentially a different
@@ -271,7 +198,7 @@ class RGate(Gate):
     """
 
     def __init__(self, axis_angle, rotation_angle, label=None):
-        super().__init__("r", 1, [axis_angle, rotation_angle], label=label)
+        super().__init__("jaqalr", 1, [axis_angle, rotation_angle], label=label)
 
     def _define(self):
         """
@@ -282,8 +209,8 @@ class RGate(Gate):
         rz(axis_angle) a;
         }
         """
-        definition = []
         q = QuantumRegister(1, "q")
+        qc = QuantumCircuit(q, name=self.name)
         axis_angle, rotation_angle = tuple(self.params)
         rule = [
             (RZGate(-axis_angle), [q[0]], []),
@@ -291,12 +218,12 @@ class RGate(Gate):
             (RZGate(axis_angle), [q[0]], []),
         ]
         for inst in rule:
-            definition.append(inst)
-        self.definition = definition
+            qc._append(*inst)
+        self.definition = qc
 
 
-def r(self, axis_angle, rotation_angle, q):
-    return self.append(RGate(axis_angle, rotation_angle), [q], [])
+def jaqalr(self, axis_angle, rotation_angle, q):
+    return self.append(JaqalRGate(axis_angle, rotation_angle), [q], [])
 
 
-QuantumCircuit.r = r
+QuantumCircuit.jaqalr = jaqalr

@@ -4,18 +4,19 @@
 from .frontend import (
     jaqal_circuit_from_dag_circuit,
     jaqal_circuit_from_qiskit_circuit,
+    ion_pass_manager,
 )
-from .gates import MSGate, SXGate, SXDGate, SYGate, SYDGate, RGate
-from .unroller import IonUnroller
+from .gates import MSGate, SYGate, SYdgGate, JaqalRGate
+
+# from .unroller import IonUnroller
 
 __all__ = [
     "jaqal_circuit_from_dag_circuit",
     "jaqal_circuit_from_qiskit_circuit",
+    "ion_pass_manager",
     "MSGate",
-    "SXGate",
-    "SXDGate",
     "SYGate",
-    "SYDGate",
-    "RGate",
-    "IonUnroller",
+    "SYdgGate",
+    "JaqalRGate",
+    #    "IonUnroller",
 ]

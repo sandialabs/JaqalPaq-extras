@@ -1,17 +1,18 @@
 """
 Defines interpolated gate and factory classes
 """
-#***************************************************************************************************
+# ***************************************************************************************************
 # Copyright 2015, 2019 National Technology & Engineering Solutions of Sandia, LLC (NTESS).
 # Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights
 # in this software.
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
 # in compliance with the License.  You may obtain a copy of the License at
 # http://www.apache.org/licenses/LICENSE-2.0 or in the LICENSE file in the root pyGSTi directory.
-#***************************************************************************************************
+# ***************************************************************************************************
 
 
-import numpy as _np ; import scipy.linalg as _spl
+import numpy as _np
+import scipy.linalg as _spl
 import pickle as _pickle
 from scipy.interpolate import LinearNDInterpolator as _linND
 from scipy.linalg import logm as _logm, expm as _expm
@@ -26,10 +27,10 @@ from pygsti.objects.opfactory import OpFactory as _OpFactory
 from pygsti.objects.verbosityprinter import VerbosityPrinter as _VerbosityPrinter
 
 
-#TODO move elsewhere?
+# TODO move elsewhere?
 def _split(n, a, cast_to_array=True):
     k, m = divmod(len(a), n)
-    lst = list(a[i * k + min(i, m):(i + 1) * k + min(i + 1, m)] for i in range(n))
+    lst = list(a[i * k + min(i, m) : (i + 1) * k + min(i + 1, m)] for i in range(n))
     return _np.array(lst) if cast_to_array else lst
 
 
@@ -41,7 +42,9 @@ def _flatten(x):
 
 
 class _PhysicalBase(object):
-    def __init__(self, num_params, item_shape, aux_shape=None, num_params_evaluated_as_group=0):
+    def __init__(
+        self, num_params, item_shape, aux_shape=None, num_params_evaluated_as_group=0
+    ):
         self.num_params = num_params
         self.item_shape = item_shape
         self.aux_shape = aux_shape  # None means no aux data
@@ -55,31 +58,48 @@ class _PhysicalBase(object):
 
 
 class PhysicalProcess(_PhysicalBase):
-
-    def __init__(self, num_params, process_shape, aux_shape=None, num_params_evaluated_as_group=0):
-        super().__init__(num_params, process_shape, aux_shape, num_params_evaluated_as_group)
+    def __init__(
+        self, num_params, process_shape, aux_shape=None, num_params_evaluated_as_group=0
+    ):
+        super().__init__(
+            num_params, process_shape, aux_shape, num_params_evaluated_as_group
+        )
 
     def create_process_matrix(self, v, comm=None):
-        raise NotImplementedError("Derived classes must implement create_process_matrix!")
+        raise NotImplementedError(
+            "Derived classes must implement create_process_matrix!"
+        )
 
     def create_process_matrices(self, v, grouped_v, comm=None):
-        raise NotImplementedError("Derived class must implement `create_process_matrices`!")
+        raise NotImplementedError(
+            "Derived class must implement `create_process_matrices`!"
+        )
 
 
 class PhysicalErrorGenerator(_PhysicalBase):
-
-    def __init__(self, num_params, errorgen_shape, aux_shape=None, num_params_evaluated_as_group=0):
-        super().__init__(num_params, errorgen_shape, aux_shape, num_params_evaluated_as_group)
+    def __init__(
+        self,
+        num_params,
+        errorgen_shape,
+        aux_shape=None,
+        num_params_evaluated_as_group=0,
+    ):
+        super().__init__(
+            num_params, errorgen_shape, aux_shape, num_params_evaluated_as_group
+        )
 
     def create_errorgen_matrix(self, v, comm=None):
-        raise NotImplementedError("Derived classes must implement create_errorgen_matrix!")
+        raise NotImplementedError(
+            "Derived classes must implement create_errorgen_matrix!"
+        )
 
     def create_errorgen_matrices(self, v, grouped_v, comm=None):
-        raise NotImplementedError("Derived class must implement `create_errorgen_matrices`!")
+        raise NotImplementedError(
+            "Derived class must implement `create_errorgen_matrices`!"
+        )
 
 
 class OpPhysicalProcess(PhysicalProcess):
-
     def __init__(self, op):
         self.op = op
         super().__init__(op.num_params, (op.dim, op.dim), None, 0)
@@ -90,52 +110,80 @@ class OpPhysicalProcess(PhysicalProcess):
 
 
 class InterpolatedOpFactory(_OpFactory):
-
     @classmethod
-    def create_by_interpolating_physical_process(cls, target_factory, physical_process, argument_ranges,
-                                                 parameter_ranges, argument_indices=None, comm=None,
-                                                 mpi_workers_per_process=1, interpolator_and_args=None, verbosity=0):
-        #printer = _VerbosityPrinter.build_printer(verbosity)
+    def create_by_interpolating_physical_process(
+        cls,
+        target_factory,
+        physical_process,
+        argument_ranges,
+        parameter_ranges,
+        argument_indices=None,
+        comm=None,
+        mpi_workers_per_process=1,
+        interpolator_and_args=None,
+        verbosity=0,
+    ):
+        # printer = _VerbosityPrinter.build_printer(verbosity)
         nargs = len(argument_ranges)
         if argument_indices is None:
             argument_indices = _np.arange(nargs, dtype=int)
         else:
             argument_indices = _np.array(argument_indices, dtype=int)
-        param_indices = _np.array(sorted(set(range(physical_process.num_params)) - set(argument_indices)), dtype=int)
+        param_indices = _np.array(
+            sorted(set(range(physical_process.num_params)) - set(argument_indices)),
+            dtype=int,
+        )
 
         ngroups = physical_process.num_params_evaluated_as_group
         process_shape = physical_process.item_shape
         if isinstance(physical_process, PhysicalErrorGenerator):
             if ngroups > 0:
+
                 def fn(v, grouped_v, comm):
-                    return physical_process.create_errorgen_matrices(v, grouped_v, comm=comm)
+                    return physical_process.create_errorgen_matrices(
+                        v, grouped_v, comm=comm
+                    )
+
             else:
+
                 def fn(v, comm):
                     return physical_process.create_errorgen_matrix(v, comm=comm)
+
         else:
             if ngroups > 0:
+
                 def fn(v, grouped_v, comm):
-                    process_mxs = physical_process.create_process_matrices(v, grouped_v, comm=comm)
+                    process_mxs = physical_process.create_process_matrices(
+                        v, grouped_v, comm=comm
+                    )
                     if comm is not None and comm.Get_rank() != 0:
                         return None  # a "slave" processor that doesn't need to report a value (process_mxs can be None)
 
                     grouped_dims = tuple(map(len, grouped_v))
-                    ret = _np.empty(grouped_dims + process_shape, 'd')
-                    assert(process_mxs.shape == ret.shape)
+                    ret = _np.empty(grouped_dims + process_shape, "d")
+                    assert process_mxs.shape == ret.shape
 
-                    for index_tup, gv in zip(_itertools.product(*[range(d) for d in grouped_dims]),
-                                             _itertools.product(*grouped_v)):
+                    for index_tup, gv in zip(
+                        _itertools.product(*[range(d) for d in grouped_dims]),
+                        _itertools.product(*grouped_v),
+                    ):
                         fullv = _np.concatenate((v, gv))
                         args = fullv[argument_indices]
                         params = fullv[param_indices]
 
                         target_op = target_factory.create_op(args, sslbls=None)
-                        target_op.from_vector(params[0:target_op.num_params()])
+                        target_op.from_vector(params[0 : target_op.num_params()])
                         target_mx = target_op.todense()
 
-                        ret[index_tup] = _np.real(_spl.logm(_np.dot(process_mxs[index_tup], _spl.inv(target_mx))))
+                        ret[index_tup] = _np.real(
+                            _spl.logm(
+                                _np.dot(process_mxs[index_tup], _spl.inv(target_mx))
+                            )
+                        )
                     return ret
+
             else:
+
                 def fn(v, comm):
                     process_mx = physical_process.create_process_matrix(v, comm=comm)
                     if comm is not None and comm.Get_rank() != 0:
@@ -144,37 +192,52 @@ class InterpolatedOpFactory(_OpFactory):
                     args = v[argument_indices]
                     params = v[param_indices]
                     target_op = target_factory.create_op(args, sslbls=None)
-                    target_op.from_vector(params[0:target_op.num_params()])
+                    target_op.from_vector(params[0 : target_op.num_params()])
                     target_mx = target_op.todense()
                     return _np.real(_spl.logm(_np.dot(process_mx, _spl.inv(target_mx))))
 
         ranges = [None] * (len(argument_ranges) + len(parameter_ranges))
-        for i, arg_range in zip(argument_indices, argument_ranges): ranges[i] = arg_range
-        for i, param_range in zip(param_indices, parameter_ranges): ranges[i] = param_range
+        for i, arg_range in zip(argument_indices, argument_ranges):
+            ranges[i] = arg_range
+        for i, param_range in zip(param_indices, parameter_ranges):
+            ranges[i] = param_range
 
-        base_interp_builder = InterpolatedQuantityFactory(fn, process_shape, ranges, None, ngroups,
-                                                          interpolator_and_args)
-        base_interpolator = base_interp_builder.build(comm, mpi_workers_per_process, verbosity)
+        base_interp_builder = InterpolatedQuantityFactory(
+            fn, process_shape, ranges, None, ngroups, interpolator_and_args
+        )
+        base_interpolator = base_interp_builder.build(
+            comm, mpi_workers_per_process, verbosity
+        )
 
         if physical_process.aux_shape is not None:
 
             aux_shape = physical_process.aux_shape
             if ngroups > 0:
+
                 def aux_fn(v, grouped_v, comm):
                     return physical_process.create_aux_infos(v, grouped_v, comm=comm)
+
             else:
+
                 def aux_fn(v, comm):
                     return physical_process.create_aux_info(v, comm=comm)
 
-            aux_interp_builder = InterpolatedQuantityFactory(aux_fn, aux_shape, ranges, None, ngroups,
-                                                             interpolator_and_args)
-            aux_interpolator = aux_interp_builder.build(comm, mpi_workers_per_process, verbosity)
+            aux_interp_builder = InterpolatedQuantityFactory(
+                aux_fn, aux_shape, ranges, None, ngroups, interpolator_and_args
+            )
+            aux_interpolator = aux_interp_builder.build(
+                comm, mpi_workers_per_process, verbosity
+            )
         else:
             aux_interpolator = None
 
-        return cls(target_factory, argument_indices, base_interpolator, aux_interpolator)
+        return cls(
+            target_factory, argument_indices, base_interpolator, aux_interpolator
+        )
 
-    def __init__(self, target_factory, argument_indices, base_interpolator, aux_interpolator=None):
+    def __init__(
+        self, target_factory, argument_indices, base_interpolator, aux_interpolator=None
+    ):
         # NOTE: factory_argument_indices refer to the *interpolated* parameters, i.e. those of the interpolators.
         self.target_factory = target_factory
         self._argument_indices = argument_indices
@@ -182,32 +245,50 @@ class InterpolatedOpFactory(_OpFactory):
         self.aux_interpolator = aux_interpolator
 
         dim = self.base_interpolator.qty_shape[0]
-        assert(self.base_interpolator.qty_shape == (dim, dim)), \
-            "Base interpolator must interpolate a square matrix value!"
-        assert(target_factory.dim == dim), "Target factory dim must match interpolated matrix dim!"
+        assert self.base_interpolator.qty_shape == (
+            dim,
+            dim,
+        ), "Base interpolator must interpolate a square matrix value!"
+        assert (
+            target_factory.dim == dim
+        ), "Target factory dim must match interpolated matrix dim!"
 
         num_interp_params = self.base_interpolator.num_params()
         self.num_factory_args = len(self._argument_indices)
-        self._parameterized_indices = _np.array(sorted(set(range(num_interp_params)) - set(self._argument_indices)))
+        self._parameterized_indices = _np.array(
+            sorted(set(range(num_interp_params)) - set(self._argument_indices))
+        )
 
         initial_point = []
         for i in self._parameterized_indices:
             min_val, max_val = self.base_interpolator.parameter_ranges[i]
             initial_point.append((min_val + max_val) / 2)
-        self._paramvec = _np.array(initial_point, 'd')
+        self._paramvec = _np.array(initial_point, "d")
 
         super().__init__(dim, evotype="densitymx")
         self.from_vector(self._paramvec)  # initialize object
 
     def create_object(self, args=None, sslbls=None):
-        target_op = self.target_factory.create_op(args, sslbls=None)  # sets vector of target_op
-        assert(len(args) == self.num_factory_args), \
-            "Wrong number of factory args! (Expected %d and got %d)" % (self.num_factory_args, len(args))
+        target_op = self.target_factory.create_op(
+            args, sslbls=None
+        )  # sets vector of target_op
+        assert (
+            len(args) == self.num_factory_args
+        ), "Wrong number of factory args! (Expected %d and got %d)" % (
+            self.num_factory_args,
+            len(args),
+        )
 
-        return InterpolatedDenseOp(target_op, self.base_interpolator, self.aux_interpolator, self.to_vector(),
-                                   _np.array(args), self._argument_indices)
+        return InterpolatedDenseOp(
+            target_op,
+            self.base_interpolator,
+            self.aux_interpolator,
+            self.to_vector(),
+            _np.array(args),
+            self._argument_indices,
+        )
 
-    #def write(self, dirname):
+    # def write(self, dirname):
     #    dirname = _pathlib.Path(dirname)
     #    with open(str(dirname / "targetop.pkl"), 'wb') as f:
     #        _pickle.dump(self.target_op, f)
@@ -224,7 +305,7 @@ class InterpolatedOpFactory(_OpFactory):
 
     def from_vector(self, v, close=False, dirty_value=True):
         self._paramvec[:] = v
-        self.target_factory.from_vector(v[0:self.target_factory.num_params()])
+        self.target_factory.from_vector(v[0 : self.target_factory.num_params()])
         self.dirty = dirty_value
 
     ##----------------------------------------------------------------------------
@@ -232,8 +313,8 @@ class InterpolatedOpFactory(_OpFactory):
 
 class InterpolatedDenseOp(_DenseOperator):
 
-    #@classmethod
-    #def from_dir(cls, dirname):
+    # @classmethod
+    # def from_dir(cls, dirname):
     #    dirname = _pathlib.Path(dirname)
     #    with open(str(dirname / "targetop.pkl"), 'rb') as f:
     #        target_op = _pickle.load(f)
@@ -251,94 +332,157 @@ class InterpolatedDenseOp(_DenseOperator):
     #    return cls(target_op, base_interp, aux_interp, pt, tm)
 
     @classmethod
-    def create_by_interpolating_physical_process(cls, target_op, physical_process, parameter_ranges=None,
-                                                 parameter_points=None, comm=None,
-                                                 mpi_workers_per_process=1, interpolator_and_args=None, verbosity=0):
+    def create_by_interpolating_physical_process(
+        cls,
+        target_op,
+        physical_process,
+        parameter_ranges=None,
+        parameter_points=None,
+        comm=None,
+        mpi_workers_per_process=1,
+        interpolator_and_args=None,
+        verbosity=0,
+    ):
         # object_to_interpolate is a PhysicalProcess (or a LinearOperator with adapter?)
         # XXX- anything with from_vector and to_dense methods
         # or a create_process_matrix(v, time=None) method.
         # if times is not None, then this operator's set_time functions nontrivially and object_to_interpolate must be a
         # PhysicalProcess that implements the create_process_matrices(v, times) method
 
-        #printer = _VerbosityPrinter.build_printer(verbosity)
+        # printer = _VerbosityPrinter.build_printer(verbosity)
         ngroups = physical_process.num_params_evaluated_as_group
         process_shape = physical_process.item_shape
         if isinstance(physical_process, PhysicalErrorGenerator):
             if ngroups > 0:
+
                 def fn(v, grouped_v, comm):
-                    return physical_process.create_errorgen_matrices(v, grouped_v, comm=comm)
+                    return physical_process.create_errorgen_matrices(
+                        v, grouped_v, comm=comm
+                    )
+
             else:
+
                 def fn(v, comm):
                     return physical_process.create_errorgen_matrix(v, comm=comm)
+
         else:
             if ngroups > 0:
+
                 def fn(v, grouped_v, comm):
-                    process_mxs = physical_process.create_process_matrices(v, grouped_v, comm=comm)
+                    process_mxs = physical_process.create_process_matrices(
+                        v, grouped_v, comm=comm
+                    )
                     if comm is not None and comm.Get_rank() != 0:
                         return None  # a "slave" processor that doesn't need to report a value (process_mxs can be None)
 
                     grouped_dims = tuple(map(len, grouped_v))
-                    ret = _np.empty(grouped_dims + process_shape, 'd')
-                    assert(process_mxs.shape == ret.shape)
+                    ret = _np.empty(grouped_dims + process_shape, "d")
+                    assert process_mxs.shape == ret.shape
 
-                    for index_tup, gv in zip(_itertools.product(*[range(d) for d in grouped_dims]),
-                                             _itertools.product(*grouped_v)):
+                    for index_tup, gv in zip(
+                        _itertools.product(*[range(d) for d in grouped_dims]),
+                        _itertools.product(*grouped_v),
+                    ):
                         params = _np.concatenate((v, gv))
-                        target_op.from_vector(params[0:target_op.num_params()])
+                        target_op.from_vector(params[0 : target_op.num_params()])
                         target_mx = target_op.todense()
-                        ret[index_tup] = _np.real(_spl.logm(_np.dot(process_mxs[index_tup], _spl.inv(target_mx))))
+                        ret[index_tup] = _np.real(
+                            _spl.logm(
+                                _np.dot(process_mxs[index_tup], _spl.inv(target_mx))
+                            )
+                        )
                     return ret
+
             else:
+
                 def fn(v, comm):
                     process_mx = physical_process.create_process_matrix(v, comm=comm)
                     if comm is not None and comm.Get_rank() != 0:
                         return None  # a "slave" processor that doesn't need to report a value (process_mx can be None)
 
-                    target_op.from_vector(v[0:target_op.num_params()])
+                    target_op.from_vector(v[0 : target_op.num_params()])
                     target_mx = target_op.todense()
                     return _np.real(_spl.logm(_np.dot(process_mx, _spl.inv(target_mx))))
 
-        base_interp_builder = InterpolatedQuantityFactory(fn, process_shape, parameter_ranges, parameter_points,
-                                                          ngroups, interpolator_and_args)
-        base_interpolator = base_interp_builder.build(comm, mpi_workers_per_process, verbosity)
+        base_interp_builder = InterpolatedQuantityFactory(
+            fn,
+            process_shape,
+            parameter_ranges,
+            parameter_points,
+            ngroups,
+            interpolator_and_args,
+        )
+        base_interpolator = base_interp_builder.build(
+            comm, mpi_workers_per_process, verbosity
+        )
 
         if physical_process.aux_shape is not None:
 
             aux_shape = physical_process.aux_shape
             if ngroups > 0:
+
                 def aux_fn(v, grouped_v, comm):
                     return physical_process.create_aux_infos(v, grouped_v, comm=comm)
+
             else:
+
                 def aux_fn(v, comm):
                     return physical_process.create_aux_info(v, comm=comm)
 
-            aux_interp_builder = InterpolatedQuantityFactory(aux_fn, aux_shape, parameter_ranges, parameter_points,
-                                                             ngroups, interpolator_and_args)
-            aux_interpolator = aux_interp_builder.build(comm, mpi_workers_per_process, verbosity)
+            aux_interp_builder = InterpolatedQuantityFactory(
+                aux_fn,
+                aux_shape,
+                parameter_ranges,
+                parameter_points,
+                ngroups,
+                interpolator_and_args,
+            )
+            aux_interpolator = aux_interp_builder.build(
+                comm, mpi_workers_per_process, verbosity
+            )
         else:
             aux_interpolator = None
 
         return cls(target_op, base_interpolator, aux_interpolator)
 
-    def __init__(self, target_op, base_interpolator, aux_interpolator=None, initial_point=None,
-                 frozen_parameter_values=None, frozen_parameter_indices=None):
+    def __init__(
+        self,
+        target_op,
+        base_interpolator,
+        aux_interpolator=None,
+        initial_point=None,
+        frozen_parameter_values=None,
+        frozen_parameter_indices=None,
+    ):
         # NOTE: frozen_parameter_indices refer to the *interpolated* parameters, i.e. those of the interpolators.
         self.target_op = target_op
         self.base_interpolator = base_interpolator
         self.aux_interpolator = aux_interpolator
 
         num_interp_params = self.base_interpolator.num_params()
-        self._frozen_indices = _np.array(frozen_parameter_indices) \
-            if (frozen_parameter_indices is not None) else _np.empty(0, int)
-        self._frozen_values = _np.array(frozen_parameter_values) \
-            if (frozen_parameter_values is not None) else _np.empty(0, 'd')
-        self._parameterized_indices = _np.array(sorted(set(range(num_interp_params)) - set(self._frozen_indices)))
+        self._frozen_indices = (
+            _np.array(frozen_parameter_indices)
+            if (frozen_parameter_indices is not None)
+            else _np.empty(0, int)
+        )
+        self._frozen_values = (
+            _np.array(frozen_parameter_values)
+            if (frozen_parameter_values is not None)
+            else _np.empty(0, "d")
+        )
+        self._parameterized_indices = _np.array(
+            sorted(set(range(num_interp_params)) - set(self._frozen_indices))
+        )
         self.aux_info = None
 
         dim = self.base_interpolator.qty_shape[0]
-        assert(self.base_interpolator.qty_shape == (dim, dim)), \
-            "Base interpolator must interpolate a square matrix value!"
-        assert(target_op.dim == dim), "Target operation dim must match interpolated matrix dim!"
+        assert self.base_interpolator.qty_shape == (
+            dim,
+            dim,
+        ), "Base interpolator must interpolate a square matrix value!"
+        assert (
+            target_op.dim == dim
+        ), "Target operation dim must match interpolated matrix dim!"
 
         if initial_point is None:
             initial_point = []
@@ -346,17 +490,20 @@ class InterpolatedDenseOp(_DenseOperator):
                 min_val, max_val = self.base_interpolator.parameter_ranges[i]
                 initial_point.append((min_val + max_val) / 2)
         else:
-            assert(len(initial_point) == len(self._parameterized_indices)), \
-                "`initial_point` has the wrong length! (expected %d, got %d)" % (
-                    len(self._parameterized_indices), len(initial_point))
-        self._paramvec = _np.array(initial_point, 'd')
+            assert len(initial_point) == len(
+                self._parameterized_indices
+            ), "`initial_point` has the wrong length! (expected %d, got %d)" % (
+                len(self._parameterized_indices),
+                len(initial_point),
+            )
+        self._paramvec = _np.array(initial_point, "d")
 
-        super().__init__(_np.identity(dim, 'd'), evotype="densitymx")
+        super().__init__(_np.identity(dim, "d"), evotype="densitymx")
 
         # initialize object
         self.from_vector(self._paramvec)
 
-    #def write(self, dirname):
+    # def write(self, dirname):
     #    dirname = _pathlib.Path(dirname)
     #    with open(str(dirname / "targetop.pkl"), 'wb') as f:
     #        _pickle.dump(self.target_op, f)
@@ -373,12 +520,14 @@ class InterpolatedDenseOp(_DenseOperator):
 
     def from_vector(self, v, close=False, dirty_value=True):
         self._paramvec[:] = v
-        self.target_op.from_vector(v[0:self.target_op.num_params()])
-        fullv = _np.empty(self.base_interpolator.num_params(), 'd')
+        self.target_op.from_vector(v[0 : self.target_op.num_params()])
+        fullv = _np.empty(self.base_interpolator.num_params(), "d")
         fullv[self._parameterized_indices] = self._paramvec
         fullv[self._frozen_indices] = self._frozen_values
         errorgen = self.base_interpolator(fullv)
-        self.base[:, :] = _ot.operation_from_error_generator(errorgen, self.target_op.todense(), 'logGTi')
+        self.base[:, :] = _ot.operation_from_error_generator(
+            errorgen, self.target_op.todense(), "logGTi"
+        )
 
         if self.aux_interpolator is not None:
             self.aux_info = self.aux_interpolator(fullv)
@@ -390,9 +539,15 @@ class InterpolatedDenseOp(_DenseOperator):
 
 
 class InterpolatedQuantityFactory(object):
-
-    def __init__(self, fn_to_interpolate, qty_shape=(), parameter_ranges=None, parameter_points=None,
-                 num_params_to_evaluate_as_group=0, interpolator_and_args=None):
+    def __init__(
+        self,
+        fn_to_interpolate,
+        qty_shape=(),
+        parameter_ranges=None,
+        parameter_points=None,
+        num_params_to_evaluate_as_group=0,
+        interpolator_and_args=None,
+    ):
         """
         Creates an InterpolatedQuantityFactory object.
 
@@ -439,11 +594,13 @@ class InterpolatedQuantityFactory(object):
             default of `(scipy.interpolate.LinearNDInterpolator, {'rescale': True})` is used.
         """
         self.fn_to_interpolate = fn_to_interpolate
-        assert(bool(parameter_ranges is not None) ^ bool(parameter_points is not None)), \
-            "Exactly one of `parameter_ranges` or `parameter_points` must be specified!"
+        assert bool(parameter_ranges is not None) ^ bool(
+            parameter_points is not None
+        ), "Exactly one of `parameter_ranges` or `parameter_points` must be specified!"
         self._parameter_ranges = parameter_ranges
-        self._parameter_points = _np.array(parameter_points) if (parameter_points is not None) \
-            else None  # ensures all points have same length
+        self._parameter_points = (
+            _np.array(parameter_points) if (parameter_points is not None) else None
+        )  # ensures all points have same length
         self._num_params_to_evaluate_as_group = num_params_to_evaluate_as_group
         self.data = None
         self.points = None
@@ -456,7 +613,7 @@ class InterpolatedQuantityFactory(object):
 
         # Define the MPI parameters
         if comm is not None:
-            comm.Set_name('comm_world')
+            comm.Set_name("comm_world")
             rank = comm.Get_rank()
             size = comm.Get_size()
             mpi_workers_per_process = min(size, mpi_workers_per_process)
@@ -470,34 +627,43 @@ class InterpolatedQuantityFactory(object):
         num_mpi_groups = len(root_ranks)
         if comm is not None:
             groupcomm = comm.Split(color, rank)
-            groupcomm.Set_name('comm_group_%d' % color)
-            #grouprank = groupcomm.Get_rank()
-            #groupsize = groupcomm.Get_size()
+            groupcomm.Set_name("comm_group_%d" % color)
+            # grouprank = groupcomm.Get_rank()
+            # groupsize = groupcomm.Get_size()
             rootcomm = comm.Create_group(comm.group.Incl(root_ranks))
             if rank in root_ranks:
-                rootcomm.Set_name('comm_root')
+                rootcomm.Set_name("comm_root")
         else:
             groupcomm = None
 
         # build the interpolation grid
         if self._parameter_ranges is not None:
-            assert(self._parameter_points is None)
+            assert self._parameter_points is None
             ngroups = self._num_params_to_evaluate_as_group
             iFirstGrouped = len(self._parameter_ranges) - ngroups
             axial_points = []
             for rng in self._parameter_ranges:
                 if isinstance(rng, tuple):
-                    assert(len(rng) == 3), "Tuple range specifiers must have (min, max, npoints) form!"
+                    assert (
+                        len(rng) == 3
+                    ), "Tuple range specifiers must have (min, max, npoints) form!"
                     axial_points.append(_np.linspace(*rng))
                 else:
-                    assert(isinstance(rng, _np.ndarray)), "Parameter ranges must be specified by tuples or arrays!"
+                    assert isinstance(
+                        rng, _np.ndarray
+                    ), "Parameter ranges must be specified by tuples or arrays!"
                     axial_points.append(rng)
 
-            points_to_distribute = _np.array(list(_itertools.product(*axial_points[0:iFirstGrouped])))
+            points_to_distribute = _np.array(
+                list(_itertools.product(*axial_points[0:iFirstGrouped]))
+            )
             grouped_axial_pts = axial_points[iFirstGrouped:]
             all_points = _np.array(list(_itertools.product(*axial_points)))
         else:
-            assert(self._parameter_points is not None and self._num_params_to_evaluate_as_group == 0)
+            assert (
+                self._parameter_points is not None
+                and self._num_params_to_evaluate_as_group == 0
+            )
             points_to_distribute = self._parameter_points
             grouped_axial_pts = []
             all_points = points_to_distribute
@@ -518,31 +684,47 @@ class InterpolatedQuantityFactory(object):
             my_points = my_points[0]
 
         if rank in root_ranks:
-            #Only root ranks store data (fn_to_interpolate only needs to return results on root proc)
-            flat_data = _np.empty(len(my_points) * int(_np.product(expected_fn_output_shape)), dtype='d')
-            data = flat_data.view(); data.shape = (len(my_points),) + expected_fn_output_shape
-            if (comm is not None):
-                printer.log("Group %d processing %d points on %d processors." % (color, len(my_points),
-                                                                                 mpi_workers_per_process))
+            # Only root ranks store data (fn_to_interpolate only needs to return results on root proc)
+            flat_data = _np.empty(
+                len(my_points) * int(_np.product(expected_fn_output_shape)), dtype="d"
+            )
+            data = flat_data.view()
+            data.shape = (len(my_points),) + expected_fn_output_shape
+            if comm is not None:
+                printer.log(
+                    "Group %d processing %d points on %d processors."
+                    % (color, len(my_points), mpi_workers_per_process)
+                )
         else:
             flat_data = data = None  # to keep us from accidentally misusing these below
 
         # compute the process matrices at each data point
         for ind, point in enumerate(my_points):
             printer.log("Evaluating index %d , data = %s" % (ind, str(point)))
-            val = self.fn_to_interpolate(point, grouped_axial_pts, comm=groupcomm) if grouped_axial_pts \
+            val = (
+                self.fn_to_interpolate(point, grouped_axial_pts, comm=groupcomm)
+                if grouped_axial_pts
                 else self.fn_to_interpolate(point, comm=groupcomm)
-            if rank in root_ranks:  # only the root proc of each groupcomm needs to produce a result
-                data[ind] = val     # (other procs can just return None, so val = None)
+            )
+            if (
+                rank in root_ranks
+            ):  # only the root proc of each groupcomm needs to produce a result
+                data[ind] = val  # (other procs can just return None, so val = None)
 
         # Gather data from groups
         if rank in root_ranks:
             if comm is not None:
                 sizes = rootcomm.gather(flat_data.size, root=0)
-                recvbuf = (_np.empty(sum(sizes), flat_data.dtype), sizes) if (rootcomm.Get_rank() == 0) else None
+                recvbuf = (
+                    (_np.empty(sum(sizes), flat_data.dtype), sizes)
+                    if (rootcomm.Get_rank() == 0)
+                    else None
+                )
                 rootcomm.Gatherv(sendbuf=flat_data, recvbuf=recvbuf, root=0)
                 if rootcomm.Get_rank() == 0:
-                    assert(rank == 0), "The rank=0 root-comm processor should also be rank=0 globally"
+                    assert (
+                        rank == 0
+                    ), "The rank=0 root-comm processor should also be rank=0 globally"
                     flat_data = recvbuf[0]
         else:
             flat_data = None
@@ -554,7 +736,9 @@ class InterpolatedQuantityFactory(object):
 
         self.points = all_points
         self.data = flat_data.view()
-        self.data.shape = (len(all_points),) + self.qty_shape  # indices are (iPoint, <data_indices>)
+        self.data.shape = (
+            len(all_points),
+        ) + self.qty_shape  # indices are (iPoint, <data_indices>)
 
     def build(self, comm=None, mpi_workers_per_process=1, verbosity=0):
 
@@ -570,13 +754,16 @@ class InterpolatedQuantityFactory(object):
             self.compute_data(comm, mpi_workers_per_process, printer)
 
         self.interpolator = _np.empty(self.qty_shape, dtype=object)
-        all_index_tuples = _split(size, list(_itertools.product(*[range(d) for d in self.qty_shape])),
-                                  cast_to_array=False)
+        all_index_tuples = _split(
+            size,
+            list(_itertools.product(*[range(d) for d in self.qty_shape])),
+            cast_to_array=False,
+        )
         my_index_tuples = all_index_tuples[rank]
         my_interpolators = _np.empty(len(my_index_tuples), dtype=object)
 
         if self.interpolator_and_args is None:
-            interp_cls, interp_kwargs = (_linND, {'rescale': True})
+            interp_cls, interp_kwargs = (_linND, {"rescale": True})
         else:
             interp_cls, interp_kwargs = self.interpolator_and_args
 
@@ -592,8 +779,10 @@ class InterpolatedQuantityFactory(object):
 
         if rank == 0:
             all_interpolators = _flatten(all_interpolators)
-            interpolators = _np.empty(self.qty_shape, dtype='object')
-            for interp, index_tuple in zip(all_interpolators, _flatten(all_index_tuples)):
+            interpolators = _np.empty(self.qty_shape, dtype="object")
+            for interp, index_tuple in zip(
+                all_interpolators, _flatten(all_index_tuples)
+            ):
                 interpolators[index_tuple] = interp
             if comm is not None:
                 comm.bcast(interpolators, root=0)
@@ -601,17 +790,20 @@ class InterpolatedQuantityFactory(object):
             interpolators = comm.bcast(None, root=0)
 
         if self._parameter_ranges is not None:
-            parameter_range_bounds = [(rng[0], rng[1]) if isinstance(rng, tuple) else (min(rng), max(rng))
-                                      for rng in self._parameter_ranges]
+            parameter_range_bounds = [
+                (rng[0], rng[1]) if isinstance(rng, tuple) else (min(rng), max(rng))
+                for rng in self._parameter_ranges
+            ]
         else:
-            parameter_range_bounds = [(min(self._parameter_points[:, i]), max(self._parameter_points[:, i]))
-                                      for i in range(self._parameter_points.shape[1])]
+            parameter_range_bounds = [
+                (min(self._parameter_points[:, i]), max(self._parameter_points[:, i]))
+                for i in range(self._parameter_points.shape[1])
+            ]
 
         return InterpolatedQuantity(interpolators, parameter_range_bounds)
 
 
 class InterpolatedQuantity(object):
-
     @classmethod
     def from_file(cls, filename):
         raise NotImplementedError()
@@ -628,11 +820,11 @@ class InterpolatedQuantity(object):
         return len(self.parameter_ranges)
 
     def __call__(self, v):
-        assert(len(v) == self.num_params())
+        assert len(v) == self.num_params()
         if not all([(a <= b <= c) for b, (a, c) in zip(v, self.parameter_ranges)]):
             raise ValueError("Parameter out of range.")
 
-        value = _np.zeros(self.qty_shape, dtype='d')
+        value = _np.zeros(self.qty_shape, dtype="d")
         for i, interpolator in enumerate(self.interpolators.flat):
             value.flat[i] = interpolator(*v)
         return value

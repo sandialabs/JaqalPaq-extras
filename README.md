@@ -53,11 +53,11 @@ installed via
 pip as follows, with the supported versions of these packages indicated:
 
 ```bash
-pip install qiskit>=0.19.0,<0.20.0
+pip install qiskit>=0.27.0,<0.28.0
 pip install pyquil>=2.21.0,<3.0.0
-pip install cirq>=0.8.2,<0.9.0
-pip install projectq>=0.5.1,<0.6.0
-pip install pytket>=0.5.6,<0.6.0
+pip install cirq>=0.11.0,<0.12.0
+pip install projectq>=0.5.1,<0.7.0
+pip install pytket>=0.5.6,<0.13.0
 ```
 
 Additionally, a gate-set specification is required for all of the transpiler

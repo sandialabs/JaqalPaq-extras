@@ -11,14 +11,37 @@ from jaqalpaq import JaqalError
 # from sympy.core.evalf import N
 import numpy as np
 
+from qiskit.transpiler.passes import UnrollCustomDefinitions, BasisTranslator
+from qiskit.qasm import pi
+from qiskit.circuit.library.standard_gates.p import PhaseGate
+from qiskit.circuit.library.standard_gates.r import RGate
+from qiskit.circuit.library.standard_gates.x import CXGate
+from qiskit.circuit.library.standard_gates.u import UGate
+from qiskit.circuit.library.standard_gates.h import HGate
+from qiskit.circuit import (
+    QuantumRegister,
+    QuantumCircuit,
+    Parameter,
+    EquivalenceLibrary,
+)
+from qiskit.circuit.library.standard_gates.equivalence_library import (
+    StandardEquivalenceLibrary,
+)
+from .gates import MSGate, SYGate, SYdgGate, JaqalRGate
+from qiskit.transpiler import PassManager
+
+
 QISKIT_NAMES = {
-    "r": "R",
+    "jaqalr": "R",
     "sx": "Sx",
-    "sxd": "Sxd",
+    "sxdg": "Sxd",
     "sy": "Sy",
-    "syd": "Syd",
+    "sydg": "Syd",
+    "s": "Sz",
+    "sdg": "Szd",
     "x": "Px",
     "y": "Py",
+    "z": "Pz",
     "rz": "Rz",
     "ms2": "MS",
 }
@@ -191,3 +214,61 @@ def jaqal_circuit_from_qiskit_circuit(circuit, names=None, native_gates=None):
             )
     block.gate("measure_all", no_duplicate=True)
     return qsc.build()
+
+
+def ion_equivalence_library():
+    el = EquivalenceLibrary(base=StandardEquivalenceLibrary)
+    q1 = QuantumRegister(1, "q")
+    q2 = QuantumRegister(2, "q")
+    theta = Parameter("theta")
+    phi = Parameter("phi")
+    lam = Parameter("lam")
+
+    circuit = QuantumCircuit(q1, global_phase=theta / 2)
+    circuit.rz(theta, 0)
+    el.add_equivalence(PhaseGate(theta), circuit)
+
+    circuit = QuantumCircuit(q1)
+    circuit.jaqalr(phi, theta, 0)
+    el.add_equivalence(RGate(theta, phi), circuit)
+
+    circuit = QuantumCircuit(q1)
+    circuit.rz(lam, 0)
+    circuit.jaqalr(pi / 2, theta, 0)
+    circuit.rz(phi, 0)
+    el.add_equivalence(UGate(theta, phi, lam), circuit)
+
+    circuit = QuantumCircuit(q1)
+    circuit.z(0)
+    circuit.sy(0)
+    el.add_equivalence(HGate(), circuit)
+
+    # // controlled-NOT as per Maslov (2017); this implementation takes s = v = +1
+    # gate cx a,b
+    # {
+    # ry(pi/2) a;
+    # ms(pi/2, 0) a,b;
+    # rx(-pi/2) a;
+    # rx(-pi/2) b;
+    # ry(-pi/2) a;
+    # }
+    circuit = QuantumCircuit(q2)
+    circuit.sy(0)
+    circuit.ms2(0, pi / 2, 0, 1)
+    circuit.sxdg(0)
+    circuit.sxdg(1)
+    circuit.sydg(0)
+    el.add_equivalence(CXGate(), circuit)
+
+    return el
+
+
+def ion_pass_manager():
+    pm = PassManager()
+    basis_gates = QISKIT_NAMES.keys()
+    el = ion_equivalence_library()
+
+    pm.append(
+        [UnrollCustomDefinitions(el, basis_gates), BasisTranslator(el, basis_gates)]
+    )
+    return pm

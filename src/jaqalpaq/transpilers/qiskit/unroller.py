@@ -20,7 +20,7 @@ from qiskit.dagcircuit import DAGCircuit
 from qiskit.exceptions import QiskitError
 from qiskit.circuit import ParameterExpression
 from qiskit.qasm import pi
-from qiskit.circuit.library.standard_gates.i import IdGate
+from qiskit.circuit.library.standard_gates.i import IGate
 from qiskit.circuit.library.standard_gates.x import XGate
 from qiskit.circuit.library.standard_gates.y import YGate
 from qiskit.circuit.library.standard_gates.z import ZGate
@@ -28,7 +28,7 @@ from qiskit.circuit.library.standard_gates.rx import RXGate
 from qiskit.circuit.library.standard_gates.ry import RYGate
 from qiskit.circuit.library.standard_gates.rz import RZGate
 from qiskit.circuit import QuantumRegister
-from .gates import MSGate, SXGate, SXDGate, SYGate, SYDGate, RGate
+from .gates import MSGate, SXDGate, SYDGate, JaqalRGate
 
 
 class IonUnroller(TransformationPass):

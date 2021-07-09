@@ -90,14 +90,21 @@ def jaqal_circuit_from_cirq_circuit(ccirc, names=None, native_gates=None):
             block = builder
         for op in moment:
             if op.gate:
-                if type(op.gate) in names:
+                gate_type = None
+                for name in names:
+                    if isinstance(op.gate, name):
+                        gate_type = name
+                        break
+                if gate_type:
                     if line:
                         targets = [allqubits[qb.x] for qb in op.qubits]
                     else:
                         targets = [allqubits[qubitmap[qb]] for qb in op.qubits]
-                    block.gate(*names[type(op.gate)](op.gate, *targets))
+                    block.gate(*names[gate_type](op.gate, *targets))
                 else:
-                    raise JaqalError("Convert circuit to ion gates before compiling.")
+                    raise JaqalError(
+                        "Convert %s to ion gates before compiling." % str(type(op.gate))
+                    )
             else:
                 raise JaqalError("Cannot compile operation %s." % op)
     if not need_prep:
