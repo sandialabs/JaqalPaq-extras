@@ -7,6 +7,7 @@ from .frontend import (
     ion_pass_manager,
 )
 from .gates import MSGate, SYGate, SYdgGate, JaqalRGate
+from .aer import get_ion_instance
 
 __all__ = [
     "jaqal_circuit_from_dag_circuit",

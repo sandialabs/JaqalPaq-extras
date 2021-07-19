@@ -4,8 +4,7 @@ from qiskit.providers.basebackend import BaseBackend
 from qiskit.providers.jobstatus import JobStatus
 from qiskit import Aer
 from qiskit.aqua import QuantumInstance
-from .unroller import IonUnroller
-from .frontend import jaqal_circuit_from_qiskit_circuit
+from .frontend import jaqal_circuit_from_qiskit_circuit, ion_pass_manager
 from qiskit.transpiler import PassManager
 from jaqalpaq.emulator import run_jaqal_circuit
 import numpy as np
@@ -28,24 +27,31 @@ class IonResult:
 
 
 class IonInstance(QuantumInstance):
-    def __init__(self, backend, names=None, native_gates=None, param_maps=None, **kwargs):
+    def __init__(
+        self, backend, names=None, native_gates=None, param_maps=None, **kwargs
+    ):
         super().__init__(backend, **kwargs)
-        self.transpiler_args = {"names":names, "native_gates":native_gates, "param_maps":param_maps}
+        self.transpiler_args = {
+            "names": names,
+            "native_gates": native_gates,
+            "param_maps": param_maps,
+        }
+
     def transpile(self, circuits):
         if isinstance(circuits, list):
-            return [
-                PassManager([IonUnroller()]).run(circuit.decompose())
-                for circuit in circuits
-            ]
+            ipm = ion_pass_manager()
+            return [ipm.run(circuit.decompose()) for circuit in circuits]
         else:
-            return [PassManager([IonUnroller()]).run(circuits.decompose())]
+            return [ion_pass_manager().run(circuits.decompose())]
 
     def execute(self, circuits, had_transpiled=False):
         if not had_transpiled:
             circuits = self.transpile(circuits)
         counts = {}
         for circuit in circuits:
-            jcircuit = jaqal_circuit_from_qiskit_circuit(circuit, **self.transpiler_args)
+            jcircuit = jaqal_circuit_from_qiskit_circuit(
+                circuit, **self.transpiler_args
+            )
             results = run_jaqal_circuit(jcircuit)
             probs = np.array(results.subcircuits[0].probability_by_int)
             qubits = len(circuit.qubits)
