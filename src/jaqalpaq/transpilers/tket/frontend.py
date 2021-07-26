@@ -20,7 +20,9 @@ TKET_NAMES = {
 }
 
 
-def jaqal_circuit_from_tket_circuit(tkc, native_gates=None, names=None):
+def jaqal_circuit_from_tket_circuit(
+    tkc, native_gates=None, names=None, remove_measurements=False
+):
     """Converts a pytket Circuit object to a :class:`jaqalpaq.core.Circuit`.
     The circuit will be structured as a sequence of parallel blocks, one for each Cirq
     Moment in the input. The circuit will be structured into a sequence of unscheduled
@@ -60,6 +62,8 @@ def jaqal_circuit_from_tket_circuit(tkc, native_gates=None, names=None):
     :param native_gates: The native gate set to target. If None, target the QSCOUT native
         gates.
     :type native_gates: dict or None
+    :param bool remove_measurements: Ignore any measure statements in the original circuit
+        and append a measure_all gate instead. Defaults to False.
     :returns: The same quantum circuit, converted to JaqalPaq.
     :rtype: jaqalpaq.core.Circuit
     :raises JaqalError: If the circuit includes a gate not included in `names`.
@@ -99,14 +103,29 @@ def jaqal_circuit_from_tket_circuit(tkc, native_gates=None, names=None):
     measure_accumulator = set()
     for command in tkc:
         block, measure_accumulator = convert_command(
-            command, qsc, block, names, measure_accumulator, n, registers
+            command,
+            qsc,
+            block,
+            names,
+            measure_accumulator,
+            n,
+            registers,
+            remove_measurements,
         )
     block.gate("measure_all", no_duplicate=True)
     return qsc.build()
 
 
 def convert_command(
-    command, qsc, block, names, measure_accumulator, n, registers, remaps=None
+    command,
+    qsc,
+    block,
+    names,
+    measure_accumulator,
+    n,
+    registers,
+    remove_measurements,
+    remaps=None,
 ):
     if remaps is None:
         remaps = range(n)
@@ -135,15 +154,18 @@ def convert_command(
             )
             # measure_accumulator = set()
     if op_type == OpType.Measure:
-        qb = command.qubits[0]
-        if len(qb.index) != 1:
-            target = registers[qb.reg_name + "_".join([str(x) for x in qb.index])][0]
-        else:
-            target = registers[qb.reg_name][qb.index[0]]
-        measure_accumulator = {target.resolve_qubit()[1]}
-        if len(measure_accumulator) == n:
-            block.gate("measure_all")
-            measure_accumulator = set()
+        if not remove_measurements:
+            qb = command.qubits[0]
+            if len(qb.index) != 1:
+                target = registers[qb.reg_name + "_".join([str(x) for x in qb.index])][
+                    0
+                ]
+            else:
+                target = registers[qb.reg_name][qb.index[0]]
+            measure_accumulator = {target.resolve_qubit()[1]}
+            if len(measure_accumulator) == n:
+                block.gate("measure_all")
+                measure_accumulator = set()
     elif op_type == OpType.Barrier:
         block = UnscheduledBlockBuilder()
         qsc.expression.append(block.expression)
@@ -154,7 +176,15 @@ def convert_command(
         subcirq = command.op.get_circuit()
         for cmd in subcirq:
             convert_command(
-                cmd, qsc, macro_block, names, set(), n, registers, new_remaps
+                cmd,
+                qsc,
+                macro_block,
+                names,
+                set(),
+                n,
+                registers,
+                remove_measurements,
+                new_remaps,
             )
         macro_name = f"macro_{len(qsc.macros)}"
         qsc.macro(macro_name, [], macro_block)
