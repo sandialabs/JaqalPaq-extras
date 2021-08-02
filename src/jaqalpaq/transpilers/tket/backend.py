@@ -56,15 +56,29 @@ extension_version = "1.0"
 
 
 class JaqalBackend(Backend):
+    """
+    A t|ket> backend representation of the Jaqal emulator. Does not support circuits with
+    multiple subcircuits. Except as described below, this conforms in all respects to the
+    t|ket> backend API; see its documentation for details and usage.
+
+    :param str backend_name: Label this backend for internal t|ket> reference.
+    :param emulator: Pass a backend instance to use. If omitted, instantiates a new
+        :class:`jaqalpaq.emulator.UnitarySerializedEmulator`, which in practice should
+        usually be the desired usage.
+    :type emulator: :class:`jaqalpaq.emulator.AbstractBackend` or None
+    """
+
     _persistent_handles = False
     _supports_shots = True
     _supports_counts = True
     _supports_expectation = False
     _expectation_allows_nonhermitian = False
 
-    def __init__(self, backend_name: str):
+    def __init__(self, backend_name: str, emulator: Optional[AbstractBackend] = None):
         super().__init__()
-        self._emulator: AbstractBackend = UnitarySerializedEmulator()
+        if emulator is None:
+            emulator = UnitarySerializedEmulator()
+        self._emulator: AbstractBackend = emulator
 
         gate_set: Set[OpType] = set(TKET_NAMES.keys())
         self._backend_info = BackendInfo(

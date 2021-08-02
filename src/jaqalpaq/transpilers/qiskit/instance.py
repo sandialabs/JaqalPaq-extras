@@ -3,7 +3,7 @@ from qiskit.providers.basejob import BaseJob
 from qiskit.providers.basebackend import BaseBackend
 from qiskit.providers.jobstatus import JobStatus
 from qiskit import Aer
-from qiskit.aqua import QuantumInstance
+from qiskit.utils import QuantumInstance
 from .frontend import jaqal_circuit_from_qiskit_circuit, ion_pass_manager
 from qiskit.transpiler import PassManager
 from jaqalpaq.emulator import run_jaqal_circuit
@@ -28,7 +28,13 @@ class IonResult:
 
 class IonInstance(QuantumInstance):
     def __init__(
-        self, backend, names=None, native_gates=None, param_maps=None, **kwargs
+        self,
+        backend,
+        names=None,
+        native_gates=None,
+        param_maps=None,
+        jaqal_backend=None,
+        **kwargs,
     ):
         super().__init__(backend, **kwargs)
         self.transpiler_args = {
@@ -65,5 +71,24 @@ class IonInstance(QuantumInstance):
         return IonResult(counts)
 
 
-def get_ion_instance():
-    return IonInstance(Aer.get_backend("qasm_simulator"))
+def get_ion_instance(jaqal_backend=None):
+    """
+    Creates a `qiskit.utils.QuantumInstance` representing the Jaqal emulator backend. Pass it
+    to a Qiskit Aqua algorithm or use it to transpile and emulate circuits directly with
+    its `execute` method. In the latter case, it will return a result object which can be
+    inspected with `get_counts` just as any other Qiskit result object.
+
+    .. warning::
+        The current implementation of this function returns a subclass of
+        `QuantumInstance`. What subclass if any is returned, and any methods it may have
+        in addition to those provided by a `qiskit.utils.QuantumInstance`, are internal
+        implementation details and should not be relied on.
+
+    :param jaqal_backend: Pass a backend instance to use. If omitted, instantiates a new
+        :class:`jaqalpaq.emulator.UnitarySerializedEmulator`, which in practice should
+        usually be the desired usage.
+    :type jaqal_backend: :class:`jaqalpaq.emulator.AbstractBackend` or None
+    :returns: A Qiskit representation of the Jaqal emulator.
+    :rtype: `qiskit.utils.QuantumInstance`
+    """
+    return IonInstance(Aer.get_backend("qasm_simulator"), jaqal_backend=jaqal_backend)

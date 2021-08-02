@@ -229,6 +229,16 @@ def jaqal_circuit_from_qiskit_circuit(
 
 
 def ion_equivalence_library():
+    """
+    Constructs a `qiskit.circuit.EquivalenceLibrary` containing a few standard identities
+    for converting superconducting gates to equivalent sequences of trapped-ion gates.
+    In particular, we use an implementation of the CNOT gate taken from Maslov (2017).
+    This function is intended for internal use, but may be of utility to users designing
+    their own transpilation protocols.
+
+    :returns: The equivalence library.
+    :rtype: qiskit.circuit.EquivalenceLibrary
+    """
     el = EquivalenceLibrary(base=StandardEquivalenceLibrary)
     q1 = QuantumRegister(1, "q")
     q2 = QuantumRegister(2, "q")
@@ -276,6 +286,14 @@ def ion_equivalence_library():
 
 
 def ion_pass_manager():
+    """
+    Constructs a `qiskit.transpiler.PassManager` that will unroll a circuit into the
+    QSCOUT standard gate set. Pass a `qiskit.circuit.Circuit` object into its `run` method
+    to perform the unrolling.
+
+    :returns: The pass manager.
+    :rtype: qiskit.transpiler.PassManager
+    """
     pm = PassManager()
     basis_gates = QISKIT_NAMES.keys()
     el = ion_equivalence_library()
