@@ -1,0 +1,3 @@
+include pyproject.toml
+recursive-include contrib *
+include src/jaqalpaq/__init__.py
