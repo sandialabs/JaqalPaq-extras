@@ -24,7 +24,7 @@ from qiskit.circuit.library.standard_gates.rxx import RXXGate
 from qiskit.qasm import pi
 
 
-class MSGate(Gate):
+class JaqalMSGate(Gate):
     """
     The two-parameter Mølmer-Sørensen gate, as implemented on QSCOUT hardware.
     Note that this is *not* equivalent to Qiskit's MSGate. It's equivalent to ::
@@ -33,7 +33,7 @@ class MSGate(Gate):
 
     or to the OpenQASM sequence ::
 
-        gate ms2(phi, theta) a,b
+        gate jaqalms(phi, theta) a,b
         {
         rz(phi) a;
         rz(phi+pi/2) b;
@@ -54,11 +54,11 @@ class MSGate(Gate):
     """
 
     def __init__(self, phi, theta, label=None):
-        super().__init__("ms2", 2, [phi, theta], label=label)
+        super().__init__("jaqalms", 2, [phi, theta], label=label)
 
     def _define(self):
         """
-        gate ms2(phi, theta) a,b
+        gate jaqalms(phi, theta) a,b
         {
         rz(phi) a;
         rz(phi+pi/2) b;
@@ -99,11 +99,11 @@ class MSGate(Gate):
         self.definition = qc
 
 
-def ms2(self, phi, theta, a, b):
-    return self.append(MSGate(phi, theta), [a, b], [])
+def jaqalms(self, phi, theta, a, b):
+    return self.append(JaqalMSGate(phi, theta), [a, b], [])
 
 
-QuantumCircuit.ms2 = ms2
+QuantumCircuit.jaqalms = jaqalms
 
 
 class SYGate(Gate):
@@ -184,7 +184,7 @@ class JaqalRGate(Gate):
     as implemented on QSCOUT hardware. Note that this is essentially a different
     parametrization of Qiskit's U2 gate. It's equivalent to the OpenQASM sequence ::
 
-        gate r(axis_angle, rotation_angle) a
+        gate jaqalr(axis_angle, rotation_angle) a
         {
         rz(-axis_angle) a;
         rx(rotation_angle) a;
@@ -202,7 +202,7 @@ class JaqalRGate(Gate):
 
     def _define(self):
         """
-        gate r(axis_angle, rotation_angle) a
+        gate jaqalr(axis_angle, rotation_angle) a
         {
         rz(-axis_angle) a;
         rx(rotation_angle) a;

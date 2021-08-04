@@ -4,7 +4,7 @@ import jaqalpaq
 
 qiskit = pytest.importorskip("qiskit")
 
-from jaqalpaq.transpilers.qiskit import MSGate, SYGate, SYdgGate, JaqalRGate
+from jaqalpaq.transpilers.qiskit import JaqalMSGate, SYGate, SYdgGate, JaqalRGate
 from qiskit.circuit import QuantumCircuit, QuantumRegister
 from math import pi
 
@@ -13,7 +13,7 @@ class QiskitGateTester(unittest.TestCase):
     def test_msgate(self):
         qr = QuantumRegister(2)
         circ = QuantumCircuit(qr)
-        circ.ms2(pi / 4, pi / 4, qr[0], qr[1])
+        circ.jaqalms(pi / 4, pi / 4, qr[0], qr[1])
         gates = [inst[0].name for inst in circ.decompose()]
         self.assertEqual(gates, ["u3", "u3", "rxx", "u3", "u3"])
 

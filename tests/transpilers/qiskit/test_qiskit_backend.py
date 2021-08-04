@@ -15,7 +15,7 @@ class QiskitBackendTester(unittest.TestCase):
     def test_bell_pair(self):
         qr = QuantumRegister(2)
         circ = QuantumCircuit(qr)
-        circ.ms2(pi / 4, pi / 2, qr[0], qr[1])
+        circ.jaqalms(pi / 4, pi / 2, qr[0], qr[1])
         instance = get_ion_instance()
         instance.set_config(shots=1024)
         result = instance.execute([circ])

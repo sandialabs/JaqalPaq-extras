@@ -6,14 +6,14 @@ from .frontend import (
     jaqal_circuit_from_qiskit_circuit,
     ion_pass_manager,
 )
-from .gates import MSGate, SYGate, SYdgGate, JaqalRGate
+from .gates import JaqalMSGate, SYGate, SYdgGate, JaqalRGate
 from .instance import get_ion_instance
 
 __all__ = [
     "jaqal_circuit_from_dag_circuit",
     "jaqal_circuit_from_qiskit_circuit",
     "ion_pass_manager",
-    "MSGate",
+    "JaqalMSGate",
     "SYGate",
     "SYdgGate",
     "JaqalRGate",

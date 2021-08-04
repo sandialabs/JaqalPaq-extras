@@ -5,7 +5,7 @@ import jaqalpaq
 qiskit = pytest.importorskip("qiskit")
 
 from jaqalpaq.transpilers.qiskit import (
-    MSGate,
+    JaqalMSGate,
     SYGate,
     SYdgGate,
     JaqalRGate,
@@ -20,7 +20,7 @@ class QiskitUnrollerTester(unittest.TestCase):
         qr = QuantumRegister(2)
         cr = ClassicalRegister(2)
         circ = QuantumCircuit(qr, cr)
-        circ.ms2(pi / 4, pi / 4, qr[0], qr[1])
+        circ.jaqalms(pi / 4, pi / 4, qr[0], qr[1])
         circ.jaqalr(pi / 2, pi / 4, qr[0])
         circ.x(qr[1])
         circ.y(qr[0])
@@ -70,7 +70,7 @@ class QiskitUnrollerTester(unittest.TestCase):
         unrolled = ion_pass_manager().run(circ, output_name=circ.name + " unrolled")
         c2 = QuantumCircuit(qr)
         c2.sy(qr[0])
-        c2.ms2(0, pi / 2, qr[0], qr[1])
+        c2.jaqalms(0, pi / 2, qr[0], qr[1])
         c2.sxdg(qr[0])
         c2.sxdg(qr[1])
         c2.sydg(qr[0])

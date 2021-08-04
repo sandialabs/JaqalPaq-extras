@@ -27,7 +27,7 @@ from qiskit.circuit import (
 from qiskit.circuit.library.standard_gates.equivalence_library import (
     StandardEquivalenceLibrary,
 )
-from .gates import MSGate, SYGate, SYdgGate, JaqalRGate
+from .gates import JaqalMSGate, SYGate, SYdgGate, JaqalRGate
 from qiskit.transpiler import PassManager
 
 
@@ -43,7 +43,7 @@ QISKIT_NAMES = {
     "y": "Py",
     "z": "Pz",
     "rz": "Rz",
-    "ms2": "MS",
+    "jaqalms": "MS",
 }
 
 PARAM_MAPS = {
@@ -87,9 +87,9 @@ def jaqal_circuit_from_qiskit_circuit(
 
     :param qiskit.circuit.QuantumCircuit circuit: The circuit to convert.
     :param names: A mapping from names of Qiskit gates to the corresponding native Jaqal
-        gate names. If omitted, maps r (:class:`jaqalpaq.transpilers.qiskit.RGate`),
+        gate names. If omitted, maps jaqalr (:class:`jaqalpaq.transpilers.qiskit.JaqalRGate`),
         sx (:class:`jaqalpaq.qiskit.SXGate`), sy (:class:`jaqalpaq.qiskit.SYGate`), x, y,
-        rz, and ms2 (:class:`jaqalpaq.qiskit.MSGate`) to their QSCOUT counterparts.
+        rz, and jaqalms (:class:`jaqalpaq.qiskit.JaqalMSGate`) to their QSCOUT counterparts.
     :type names: dict or None
     :param native_gates: The native gate set to target. If None, target the QSCOUT native
         gates.
@@ -276,7 +276,7 @@ def ion_equivalence_library():
     # }
     circuit = QuantumCircuit(q2)
     circuit.sy(0)
-    circuit.ms2(0, pi / 2, 0, 1)
+    circuit.jaqalms(0, pi / 2, 0, 1)
     circuit.sxdg(0)
     circuit.sxdg(1)
     circuit.sydg(0)
