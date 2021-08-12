@@ -32,6 +32,7 @@ setup(
         "cirq": ["cirq>=0.11.0,<0.12.0", "qscout-gatemodels"],
         "projectq": ["projectq>=0.5.1,<0.7.0", "qscout-gatemodels"],
         "pytket": ["pytket>=0.5.6,<0.13.0", "qscout-gatemodels"],
+        "tutorial": ["pytket-qiskit"],
     },
     python_requires=">=3.6.5",
     platforms=["any"],
