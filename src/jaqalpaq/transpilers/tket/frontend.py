@@ -13,7 +13,7 @@ import numpy as np
 
 from jaqalpaq import JaqalError
 
-TKET_NAMES = {
+_TKET_NAMES = {
     OpType.PhasedX: lambda q, alpha, beta: ("R", q, beta, alpha),
     OpType.Rz: lambda q, theta: ("Rz", q, theta),
     OpType.XXPhase: lambda q1, q2, theta: ("MS", q1, q2, 0, theta),
@@ -83,7 +83,7 @@ def jaqal_circuit_from_tket_circuit(
         native_gates = NATIVE_GATES
     qsc = CircuitBuilder(native_gates=native_gates)
     if names is None:
-        names = TKET_NAMES
+        names = _TKET_NAMES
     baseregister = qsc.register("baseregister", n)
     offset = 0
     registers = {}

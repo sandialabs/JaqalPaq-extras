@@ -50,7 +50,7 @@ from jaqalpaq import JaqalError
 from jaqalpaq.emulator import UnitarySerializedEmulator, run_jaqal_circuit
 from jaqalpaq.emulator.backend import AbstractBackend
 from jaqalpaq.core.result import ExecutionResult, ProbabilisticSubcircuit
-from .frontend import TKET_NAMES, jaqal_circuit_from_tket_circuit
+from .frontend import _TKET_NAMES, jaqal_circuit_from_tket_circuit
 
 extension_version = "1.0"
 
@@ -80,7 +80,7 @@ class JaqalBackend(Backend):
             emulator = UnitarySerializedEmulator()
         self._emulator: AbstractBackend = emulator
 
-        gate_set: Set[OpType] = set(TKET_NAMES.keys())
+        gate_set: Set[OpType] = set(_TKET_NAMES.keys())
         self._backend_info = BackendInfo(
             type(self).__name__,
             backend_name,

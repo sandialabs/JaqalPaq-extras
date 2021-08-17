@@ -31,7 +31,7 @@ from .gates import JaqalMSGate, SYGate, SYdgGate, JaqalRGate
 from qiskit.transpiler import PassManager
 
 
-QISKIT_NAMES = {
+_QISKIT_NAMES = {
     "jaqalr": "R",
     "sx": "Sx",
     "sxdg": "Sxd",
@@ -46,7 +46,7 @@ QISKIT_NAMES = {
     "jaqalms": "MS",
 }
 
-PARAM_MAPS = {
+_PARAM_MAPS = {
     "*": lambda targets, args: args,
 }
 
@@ -110,9 +110,9 @@ def jaqal_circuit_from_qiskit_circuit(
     n = sum([qreg.size for qreg in circuit.qregs])
     qsc = CircuitBuilder(native_gates=native_gates)
     if names is None:
-        names = QISKIT_NAMES
+        names = _QISKIT_NAMES
     if param_maps is None:
-        param_maps = PARAM_MAPS
+        param_maps = _PARAM_MAPS
     baseregister = qsc.register("baseregister", n)
     offset = 0
     registers = {}
@@ -295,7 +295,7 @@ def ion_pass_manager():
     :rtype: qiskit.transpiler.PassManager
     """
     pm = PassManager()
-    basis_gates = QISKIT_NAMES.keys()
+    basis_gates = _QISKIT_NAMES.keys()
     el = ion_equivalence_library()
 
     pm.append(

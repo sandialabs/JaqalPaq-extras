@@ -29,7 +29,7 @@ from jaqalpaq import JaqalError
 
 import numpy as np
 
-one_qubit_gates = {
+_one_qubit_gates = {
     Rx: lambda g, q: ("R", q, 0, normalize_angle(g.angle)),
     Ry: lambda g, q: ("R", q, np.pi / 2, normalize_angle(g.angle)),
     Rz: lambda g, q: ("Rz", q, normalize_angle(g.angle)),
@@ -37,7 +37,7 @@ one_qubit_gates = {
     YGate: lambda g, q: ("Py", q),
     SqrtXGate: lambda g, q: ("Sx", q),
 }
-two_qubit_gates = {
+_two_qubit_gates = {
     Rxx: lambda g, q1, q2: ("MS", q1, q2, 0, normalize_angle(g.angle)),
     Ryy: lambda g, q1, q2: ("MS", q1, q2, np.pi / 2, normalize_angle(g.angle)),
 }
@@ -51,8 +51,8 @@ def get_engine_list():
     :rtype: list(projectq.cengines.BasicEngine)
     """
     return restrictedgateset.get_engine_list(
-        one_qubit_gates=tuple(one_qubit_gates.keys()),
-        two_qubit_gates=tuple(two_qubit_gates.keys()),
+        one_qubit_gates=tuple(_one_qubit_gates.keys()),
+        two_qubit_gates=tuple(_two_qubit_gates.keys()),
         other_gates=(BarrierGate,),
         compiler_chooser=trapped_ion_decomposer.chooser_Ry_reducer,
     )
@@ -115,11 +115,11 @@ class JaqalBackend(BasicEngine):
         self.reset_accumulator = set()
         self.outfile = outfile
         if one_qubit_gate_map is None:
-            self.one_qubit_gates = one_qubit_gates
+            self.one_qubit_gates = _one_qubit_gates
         else:
             self.one_qubit_gates = one_qubit_gate_map
         if two_qubit_gate_map is None:
-            self.two_qubit_gates = two_qubit_gates
+            self.two_qubit_gates = _two_qubit_gates
         else:
             self.two_qubit_gates = two_qubit_gate_map
 
@@ -210,14 +210,14 @@ class JaqalBackend(BasicEngine):
             self._block = UnscheduledBlockBuilder()
             self._circuit.expression.append(self._block.expression)
 
-        elif type(gate) in one_qubit_gates:
+        elif type(gate) in _one_qubit_gates:
             qid = self._mapped_qubit_id(cmd.qubits[0][0])
             if qid in self.measure_accumulator:
                 raise JaqalError("Can't do gates in the middle of measurement!")
             else:
                 self._block.gate(*self.one_qubit_gates[type(gate)](gate, self._q[qid]))
 
-        elif type(gate) in two_qubit_gates:
+        elif type(gate) in _two_qubit_gates:
             qids = [self._mapped_qubit_id(qb[0]) for qb in cmd.qubits]
             for qid in qids:
                 if qid in self.measure_accumulator:
