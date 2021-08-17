@@ -3,25 +3,36 @@
 # certain rights in this software.
 from jaqalpaq.core import CircuitBuilder
 from jaqalpaq import JaqalError
-from cirq import (
-    XXPowGate,
-    XPowGate,
-    YPowGate,
-    ZPowGate,
-    PhasedXPowGate,
-    MeasurementGate,
-)
+
 import numpy as np
 
-CIRQ_NAMES = {
-    XXPowGate: (lambda g, q1, q2: ("MS", q1, q2, 0, g.exponent * np.pi)),
-    XPowGate: (lambda g, q: ("R", q, 0, g.exponent * np.pi)),
-    YPowGate: (lambda g, q: ("R", q, 90.0, g.exponent * np.pi)),
-    ZPowGate: (lambda g, q: ("Rz", q, g.exponent * np.pi)),
-    PhasedXPowGate: (
-        lambda g, q: ("R", q, g.phase_exponent * np.pi, g.exponent * np.pi)
-    ),
-}
+
+def _CIRQ_NAMES():
+    """(cached) Mapping of Cirq gates to Jaqal-compatible functions."""
+    global _CIRQ_NAMES_cache
+    try:
+        return _CIRQ_NAMES_cache
+    except NameError:
+        pass
+
+    from cirq import (
+        XXPowGate,
+        XPowGate,
+        YPowGate,
+        ZPowGate,
+        PhasedXPowGate,
+    )
+
+    _CIRQ_NAMES_cache = {
+        XXPowGate: (lambda g, q1, q2: ("MS", q1, q2, 0, g.exponent * np.pi)),
+        XPowGate: (lambda g, q: ("R", q, 0, g.exponent * np.pi)),
+        YPowGate: (lambda g, q: ("R", q, 90.0, g.exponent * np.pi)),
+        ZPowGate: (lambda g, q: ("Rz", q, g.exponent * np.pi)),
+        PhasedXPowGate: (
+            lambda g, q: ("R", q, g.phase_exponent * np.pi, g.exponent * np.pi)
+        ),
+    }
+    return _CIRQ_NAMES_cache
 
 
 def jaqal_circuit_from_cirq_circuit(ccirc, names=None, native_gates=None):
@@ -51,13 +62,15 @@ def jaqal_circuit_from_cirq_circuit(ccirc, names=None, native_gates=None):
     :rtype: Circuit
     :raises JaqalError: If the circuit includes a gate not included in `names`.
     """
+    from cirq import MeasurementGate
+
     if native_gates is None:
         from qscout.v1.std import NATIVE_GATES
 
         native_gates = NATIVE_GATES
     builder = CircuitBuilder(native_gates=native_gates)
     if names is None:
-        names = CIRQ_NAMES
+        names = _CIRQ_NAMES()
     try:
         n = 1 + max([qb.x for qb in ccirc.all_qubits()])
         line = True
