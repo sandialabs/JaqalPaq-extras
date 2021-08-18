@@ -52,7 +52,7 @@ def jaqal_circuit_from_tket_circuit(
 
     :param pytket.circuit.Circuit tkc: The Circuit to convert.
     :param names: A mapping from pytket OpTypes to functions taking qubits and gate
-    angle parameters and returning a tuple of arguments for
+        angle parameters and returning a tuple of arguments for
         :meth:`jaqalpaq.core.Circuit.build_gate`. If omitted, maps
         ``pytket.OpType.PhasedX`` to the QSCOUT ``R`` gate, ``pytket.OpType.Rz`` to the
         QSCOUT ``Rz`` gate, and ``pytket.OpType.XXPhase`` to the QSCOUT ``MS`` gate. The
