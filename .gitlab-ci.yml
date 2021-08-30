@@ -2,7 +2,14 @@ image: python:3.7
 
 before_script:
   - python --version
-  - echo "$CI_PROJECT_URL" | grep -q cee-gitlab.sandia.gov && INDEX="-i https://nexus.web.sandia.gov/repository/pypi-proxy/simple" && unset https_proxy http_proxy
+  - if echo "$CI_PROJECT_URL" | grep -q cee-gitlab.sandia.gov ; then
+        repo="https://nexus.web.sandia.gov/repository/pypi-proxy/simple" &&
+        pip config set global.index "$repo" &&
+        pip config set global.index-url "$repo" &&
+        echo -e '[easy_install]\nindex_url = '"${repo}" >~/.pydistutils.cfg ;
+        unset https_proxy ;
+    fi
+  - pip install --upgrade pip wheel
 
 stages:
   - Analysis and Tests
@@ -13,10 +20,18 @@ Unified Tests:
     - git fetch origin master
     - if ! git diff --check origin/master HEAD -- . ; then echo "See above whitespace errors." ; exit 1; fi
     - if find . -iname '*.py' -exec grep -l -P '\t' {} + ; then echo 'Above files have tabs.' ; exit 1 ; fi
-    - pip install $INDEX setuptools_scm
-    - pip install $INDEX black && black --check .
-    - ( unset https_proxy ; cd .. && rm -fr jaqalpaq && git clone --depth 1 "$(echo "${CI_REPOSITORY_URL}" | sed 's/jaqalpaq-extras.git/jaqalpaq.git/' )" )
-    - ( cd ../jaqalpaq && pip install $INDEX -e .[tests,pygsti-integration] )
-    - ( unset https_proxy ; cd .. && rm -fr qscout-gatemodels && git clone --depth 1 "$(echo "${CI_REPOSITORY_URL}" | sed 's/jaqalpaq-extras.git/qscout-gatemodels.git/' )" )
-    - ( cd ../qscout-gatemodels && pip install $INDEX -e . )
-    - pip install $INDEX -e .[qiskit,pyquil,cirq,projectq,pytket] && pytest
+    - devel/refresh-data-files setup.cfg.new
+    - if ! diff -q setup.cfg.new setup.cfg ; then
+        echo "Run devel/refresh-data-files to refresh examples list." ;
+        exit 1 ;
+      fi
+    - pip install black && black --check .
+    - cd ..
+    - rm -fr jaqalpaq && git clone --depth 1 "$(echo "${CI_REPOSITORY_URL}" | sed 's/jaqalpaq-extras.git/jaqalpaq.git/' )"
+    - rm -fr qscout-gatemodels && git clone --depth 1 "$(echo "${CI_REPOSITORY_URL}" | sed 's/jaqalpaq-extras.git/qscout-gatemodels.git/' )"
+    - LOCAL_JAQALPAQ=./jaqalpaq LOCAL_JAQALPAQ_EXTRAS=./jaqalpaq-extras LOCAL_QSCOUT_GATEMODELS=./qscout-gatemodels
+      JAQALPAQ_OPTS="pygsti-integration,tests"
+      JAQALPAQ_EXTRAS_OPTS="qiskit,pyquil,cirq,projectq,pytket"
+      ./jaqalpaq/install.sh
+    - cd jaqalpaq
+    - pytest
