@@ -1,8 +1,11 @@
 # Copyright 2020 National Technology & Engineering Solutions of Sandia, LLC (NTESS).
 # Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains
 # certain rights in this software.
-from jaqalpaq.core import CircuitBuilder, GateStatement
+from jaqalpaq.core import CircuitBuilder, GateStatement, Macro
 from jaqalpaq.core.circuitbuilder import UnscheduledBlockBuilder
+from jaqalpaq.core.algorithm import expand_subcircuits, expand_macros
+from jaqalpaq.core.algorithm.visitor import Visitor
+from jaqalpaq.core.algorithm.fill_in_map import fill_in_map
 
 # from qscoutlib import MSGate, QasmGate, IonUnroller
 from qiskit.converters import dag_to_circuit
@@ -18,6 +21,7 @@ from qiskit.circuit.library.standard_gates.r import RGate
 from qiskit.circuit.library.standard_gates.x import CXGate
 from qiskit.circuit.library.standard_gates.u import UGate
 from qiskit.circuit.library.standard_gates.h import HGate
+from qiskit.circuit.library.standard_gates.rxx import RXXGate
 from qiskit.circuit import (
     QuantumRegister,
     QuantumCircuit,
@@ -44,6 +48,7 @@ _QISKIT_NAMES = {
     "z": "Pz",
     "rz": "Rz",
     "jaqalms": "MS",
+    "sxx": "Sxx",
 }
 
 _PARAM_MAPS = {
@@ -226,6 +231,76 @@ def jaqal_circuit_from_qiskit_circuit(
     return qsc.build()
 
 
+def qiskit_circuit_from_jaqal_circuit(circuit, names=None):
+    if names is None:
+        names = {v: k for k, v in _QISKIT_NAMES.items()}
+
+    qkr = {
+        reg.name: QuantumRegister(size=reg.size, name=reg.name)
+        for reg in circuit.registers.values()
+        if reg.fundamental
+    }
+    expanded_circuit = fill_in_map(expand_subcircuits(expand_macros(circuit)))
+    visitor = QiskitTranspilationVisitor()
+    visitor.registers = qkr
+    visitor.names = names
+    return visitor.visit(expanded_circuit)
+
+
+class QiskitTranspilationVisitor(Visitor):
+    registers = {}
+    names = {}
+
+    def visit_default(self, obj, *args, **kwargs):
+        return obj
+
+    def visit_LoopStatement(self, obj, circ):
+        subcirc = QuantumCircuit(*self.registers.values())
+        circ.compose(
+            self.visit(obj.statements, subcirc).repeat(obj.iterations), inplace=True
+        )
+        return circ
+
+    def visit_BlockStatement(self, obj, circ):
+        for stmt in obj.statements:
+            self.visit(stmt, circ)
+        return circ
+
+    def visit_Circuit(self, obj, circ=None):
+        circ = QuantumCircuit(*self.registers.values())
+        return self.visit(obj.body, circ)
+
+    def visit_GateStatement(self, obj, circ):
+        # Note: The code originally checked if a gate was a native gate, macro, or neither,
+        # and raised an exception if neither. This assumes everything not a macro is a native gate.
+        # Note: This could be more elegant with a is_macro method on gates
+        if isinstance(obj.gate_def, Macro):
+            raise JaqalError("Expand macros before transpilation.")
+        elif obj.name == "prepare_all":
+            for reg in self.registers.values():
+                circ.reset(reg)
+        elif obj.name == "measure_all":
+            circ.measure_all()
+        else:
+            classical_params = []
+            quantum_params = []
+            for pname, pval in obj.parameters.items():
+                if pname in [
+                    cparam.name for cparam in obj.gate_def.classical_parameters
+                ]:
+                    classical_params.append(self.visit(pval))
+                else:
+                    quantum_params.append(self.visit(pval))
+            getattr(circ, self.names[obj.name])(*classical_params, *quantum_params)
+
+    def visit_Parameter(self, obj):
+        return self.visit(obj.resolve_value())
+
+    def visit_NamedQubit(self, obj):
+        reg, idx = obj.resolve_qubit()
+        return self.registers[reg.name][idx]
+
+
 def ion_equivalence_library():
     """
     Constructs a `qiskit.circuit.EquivalenceLibrary` containing a few standard identities
@@ -262,6 +337,10 @@ def ion_equivalence_library():
     circuit.z(0)
     circuit.sy(0)
     el.add_equivalence(HGate(), circuit)
+
+    circuit = QuantumCircuit(q2)
+    circuit.jaqalms(0, theta, 0, 1)
+    el.add_equivalence(RXXGate(theta), circuit)
 
     # // controlled-NOT as per Maslov (2017); this implementation takes s = v = +1
     # gate cx a,b

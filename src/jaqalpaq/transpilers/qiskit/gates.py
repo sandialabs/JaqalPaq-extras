@@ -106,6 +106,77 @@ def jaqalms(self, phi, theta, a, b):
 QuantumCircuit.jaqalms = jaqalms
 
 
+class SXXGate(Gate):
+    """
+    The XX-type Mølmer-Sørensen gate, as implemented on QSCOUT hardware.
+    Note that this is *not* equivalent to Qiskit's MSGate. It's equivalent to ::
+
+        exp(-i pi/4 XX)
+
+    or to the OpenQASM sequence ::
+
+        gate sxx() a,b
+        {
+        rz(pi/2) b;
+        CX b,a;
+        rz(-pi/2) a;
+        ry(pi) b;
+        CX a,b;
+        ry(-pi/2) b;
+        CX b,a;
+        rz(-pi/2) a;
+        }
+
+    :param label: What to label the gate on, e.g., circuit diagrams.
+    :type label: str or None
+    """
+
+    def __init__(self, label=None):
+        super().__init__("sxx", 2, [], label=label)
+
+    def _define(self):
+        """
+        gate sxx() a,b
+        {
+        rz(pi/2) b;
+        CX b,a;
+        rz(-pi/2) a;
+        ry(pi) b;
+        CX a,b;
+        ry(-pi/2) b;
+        CX b,a;
+        rz(-pi/2) a;
+        }
+        """
+        q = QuantumRegister(2, "q")
+        qc = QuantumCircuit(q, name=self.name)
+        #         rule = [
+        #             (U3Gate(0, 0, phi), [q[0]], []),
+        #             (U3Gate(0, 0, phi+pi/2), [q[1]], []),
+        #             (CnotGate(), [q[1], q[0]], []),
+        #             (U3Gate(0, 0, -pi/2), [q[0]], []),
+        #             (U3Gate(theta+pi/2,0,0), [q[1]], []),
+        #             (CnotGate(), [q[0], q[1]], []),
+        #             (U3Gate(-pi/2,0,0), [q[1]], []),
+        #             (CnotGate(), [q[1], q[0]], []),
+        #             (U3Gate(0, 0, -phi-pi/2), [q[0]], []),
+        #             (U3Gate(0, 0, -phi), [q[1]], []),
+        #         ]
+        rule = [
+            (RXXGate(pi / 2), [q[0], q[1]], []),
+        ]
+        for inst in rule:
+            qc._append(*inst)
+        self.definition = qc
+
+
+def sxx(self, a, b):
+    return self.append(SXXGate(), [a, b], [])
+
+
+QuantumCircuit.sxx = sxx
+
+
 class SYGate(Gate):
     """
     The `sqrt(Y)` gate, as implemented on QSCOUT hardware. It's equivalent to a `pi/2`
