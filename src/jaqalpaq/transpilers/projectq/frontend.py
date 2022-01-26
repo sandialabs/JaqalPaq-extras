@@ -25,7 +25,7 @@ from projectq.types import WeakQubitRef
 
 from jaqalpaq.core import CircuitBuilder
 from jaqalpaq.core.circuitbuilder import UnscheduledBlockBuilder
-from jaqalpaq import JaqalError
+from jaqalpaq.error import JaqalError
 
 import numpy as np
 

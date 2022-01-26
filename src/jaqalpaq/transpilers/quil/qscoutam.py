@@ -3,7 +3,7 @@
 # certain rights in this software.
 from pyquil.api import QAM
 
-from jaqalpaq import JaqalError
+from jaqalpaq.error import JaqalError
 
 
 class QSCOUTAM(QAM):

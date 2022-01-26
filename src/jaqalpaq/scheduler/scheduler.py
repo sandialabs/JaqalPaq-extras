@@ -11,7 +11,7 @@ from jaqalpaq.core import (
 from jaqalpaq.core.block import UnscheduledBlockStatement
 from jaqalpaq.core.algorithm.visitor import Visitor
 from jaqalpaq.core.algorithm.used_qubit_visitor import UsedQubitIndicesVisitor
-from jaqalpaq import JaqalError
+from jaqalpaq.error import JaqalError
 
 
 def schedule_circuit(circ):

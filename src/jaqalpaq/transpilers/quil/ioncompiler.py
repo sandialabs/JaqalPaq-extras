@@ -7,7 +7,7 @@ from pyquil.quil import Program, Gate
 from pyquil.quilbase import Measurement, ResetQubit, Reset, Declare
 from jaqalpaq.core import CircuitBuilder, Circuit
 from jaqalpaq.core.circuitbuilder import UnscheduledBlockBuilder
-from jaqalpaq import JaqalError
+from jaqalpaq.error import JaqalError
 import numpy as np
 
 # We automatically map gates that have the same name up to case; for example, any gate

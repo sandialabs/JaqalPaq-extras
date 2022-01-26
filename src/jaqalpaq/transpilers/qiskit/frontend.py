@@ -6,7 +6,7 @@ from jaqalpaq.core.circuitbuilder import UnscheduledBlockBuilder
 
 # from qscoutlib import MSGate, QasmGate, IonUnroller
 from qiskit.converters import dag_to_circuit
-from jaqalpaq import JaqalError
+from jaqalpaq.error import JaqalError
 
 # from sympy.core.evalf import N
 import numpy as np

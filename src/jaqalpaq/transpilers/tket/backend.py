@@ -46,7 +46,7 @@ from pytket.predicates import (
     NoMidMeasurePredicate,
 )
 
-from jaqalpaq import JaqalError
+from jaqalpaq.error import JaqalError
 from jaqalpaq.emulator import UnitarySerializedEmulator, run_jaqal_circuit
 from jaqalpaq.emulator.backend import AbstractBackend
 from jaqalpaq.core.result import ExecutionResult, ProbabilisticSubcircuit

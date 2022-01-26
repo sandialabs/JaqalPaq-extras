@@ -11,7 +11,7 @@ from jaqalpaq.core.circuitbuilder import (
 
 import numpy as np
 
-from jaqalpaq import JaqalError
+from jaqalpaq.error import JaqalError
 
 _TKET_NAMES = {
     OpType.PhasedX: lambda q, alpha, beta: ("R", q, beta, alpha),
