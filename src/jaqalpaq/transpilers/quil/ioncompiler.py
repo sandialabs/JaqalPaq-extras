@@ -39,11 +39,11 @@ class IonCompiler(AbstractCompiler):
         self.names = names
         if self.names is None:
             self.names = _QUIL_NAMES
-        self.native_gates = native_gates
-        if self.native_gates is None:
-            from qscout.v1.std import NATIVE_GATES
+        if native_gates is None:
+            from qscout.v1.std.jaqal_gates import ALL_GATES as native_gates
 
-            self.native_gates = NATIVE_GATES
+        self.native_gates = native_gates
+
         for gate_name in self.native_gates:
             if gate_name.upper() not in self.names:
                 self.names[gate_name.upper()] = gate_name

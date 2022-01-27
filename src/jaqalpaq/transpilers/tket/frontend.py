@@ -78,9 +78,8 @@ def jaqal_circuit_from_tket_circuit(
             qreg_sizes[qb.reg_name] = qb.index[0] + 1
     n = sum(qreg_sizes.values())
     if native_gates is None:
-        from qscout.v1.std import NATIVE_GATES
+        from qscout.v1.std.jaqal_gates import ALL_GATES as native_gates
 
-        native_gates = NATIVE_GATES
     qsc = CircuitBuilder(native_gates=native_gates)
     if names is None:
         names = _TKET_NAMES

@@ -65,9 +65,7 @@ def jaqal_circuit_from_cirq_circuit(ccirc, names=None, native_gates=None):
     from cirq import MeasurementGate
 
     if native_gates is None:
-        from qscout.v1.std import NATIVE_GATES
-
-        native_gates = NATIVE_GATES
+        from qscout.v1.std.jaqal_gates import ALL_GATES as native_gates
     builder = CircuitBuilder(native_gates=native_gates)
     if names is None:
         names = _CIRQ_NAMES()

@@ -104,9 +104,7 @@ def jaqal_circuit_from_qiskit_circuit(
     :raises JaqalError: If the circuit includes a gate not included in `names`.
     """
     if native_gates is None:
-        from qscout.v1.std import NATIVE_GATES
-
-        native_gates = NATIVE_GATES
+        from qscout.v1.std.jaqal_gates import ALL_GATES as native_gates
     n = sum([qreg.size for qreg in circuit.qregs])
     qsc = CircuitBuilder(native_gates=native_gates)
     if names is None:

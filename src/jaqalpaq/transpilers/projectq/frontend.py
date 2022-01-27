@@ -103,9 +103,7 @@ class JaqalBackend(BasicEngine):
     ):
         BasicEngine.__init__(self)
         if native_gates is None:
-            from qscout.v1.std import NATIVE_GATES
-
-            native_gates = NATIVE_GATES
+            from qscout.v1.std.jaqal_gates import ALL_GATES as native_gates
         self._circuit = CircuitBuilder(native_gates=native_gates)
         self._q = self._circuit.register("q", 0)
         self._block = UnscheduledBlockBuilder()

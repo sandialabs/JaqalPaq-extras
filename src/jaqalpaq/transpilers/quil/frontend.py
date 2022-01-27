@@ -52,9 +52,7 @@ def quil_gates(native_gates=None):
     """
     dkt = {}
     if native_gates is None:
-        from qscout.v1.std import NATIVE_GATES
-
-        native_gates = NATIVE_GATES
+        from qscout.v1.std.jaqal_gates import ALL_GATES as native_gates
 
     gates = {}
 

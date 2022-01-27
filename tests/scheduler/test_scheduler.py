@@ -4,7 +4,7 @@ from jaqalpaq.core.circuitbuilder import build
 from jaqalpaq.scheduler import schedule_circuit
 
 qscout = pytest.importorskip("qscout")
-from qscout.v1.std import NATIVE_GATES as native_gates
+from qscout.v1.std.jaqal_gates import ALL_GATES as native_gates
 
 
 class SchedulerTester(unittest.TestCase):
