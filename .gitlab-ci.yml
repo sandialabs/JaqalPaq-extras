@@ -1,5 +1,9 @@
 image: python:3.7
 
+variables:
+  QSCOUT_BRANCH: $QSCOUT_BRANCH
+  JAQALPAQ_BRANCH: $JAQALPAQ_BRANCH
+
 before_script:
   - python --version
   - if echo "$CI_PROJECT_URL" | grep -q cee-gitlab.sandia.gov ; then
@@ -27,8 +31,8 @@ Unified Tests:
       fi
     - pip install black && black --check .
     - cd ..
-    - rm -fr jaqalpaq && git clone --depth 1 "$(echo "${CI_REPOSITORY_URL}" | sed 's/jaqalpaq-extras.git/jaqalpaq.git/' )"
-    - rm -fr qscout-gatemodels && git clone --depth 1 "$(echo "${CI_REPOSITORY_URL}" | sed 's/jaqalpaq-extras.git/qscout-gatemodels.git/' )"
+    - rm -fr jaqalpaq && git clone --depth 1 "$(echo "${CI_REPOSITORY_URL}" | sed 's/jaqalpaq-extras.git/jaqalpaq.git/' )" -b "${JAQALPAQ_BRANCH}"
+    - rm -fr qscout-gatemodels && git clone --depth 1 "$(echo "${CI_REPOSITORY_URL}" | sed 's/jaqalpaq-extras.git/qscout-gatemodels.git/' )" -b "${QSCOUT_BRANCH}"
     - LOCAL_JAQALPAQ=./jaqalpaq LOCAL_JAQALPAQ_EXTRAS=./jaqalpaq-extras LOCAL_QSCOUT_GATEMODELS=./qscout-gatemodels
       JAQALPAQ_OPTS="pygsti-integration,tests"
       JAQALPAQ_EXTRAS_OPTS="qiskit,pyquil,cirq,projectq,pytket"
