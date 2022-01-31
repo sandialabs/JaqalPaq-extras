@@ -29,7 +29,7 @@ Unified Tests:
         echo "Run devel/refresh-data-files to refresh examples list." ;
         exit 1 ;
       fi
-    - pip install black && black --check .
+    - pip install black~=22.1 && black --check .
     - cd ..
     - rm -fr jaqalpaq && git clone --depth 1 "$(echo "${CI_REPOSITORY_URL}" | sed 's/jaqalpaq-extras.git/jaqalpaq.git/' )" -b "${JAQALPAQ_BRANCH}"
     - rm -fr qscout-gatemodels && git clone --depth 1 "$(echo "${CI_REPOSITORY_URL}" | sed 's/jaqalpaq-extras.git/qscout-gatemodels.git/' )" -b "${QSCOUT_BRANCH}"
