@@ -38,7 +38,7 @@ Unified Tests:
       JAQALPAQ_OPTS="pygsti-integration,tests"
       JAQALPAQ_EXTRAS_OPTS="qiskit,pyquil,cirq,projectq,pytket"
       ./jaqalpaq/install.sh
-    - cd jaqalpaq
+    - cd jaqalpaq-extras
     - pytest
 
 Notebooks:
