@@ -92,9 +92,11 @@ def jaqal_circuit_from_qiskit_circuit(
 
     :param qiskit.circuit.QuantumCircuit circuit: The circuit to convert.
     :param names: A mapping from names of Qiskit gates to the corresponding native Jaqal
-        gate names. If omitted, maps jaqalr (:class:`jaqalpaq.transpilers.qiskit.JaqalRGate`),
-        sx (:class:`jaqalpaq.qiskit.SXGate`), sy (:class:`jaqalpaq.qiskit.SYGate`), x, y,
-        rz, and jaqalms (:class:`jaqalpaq.qiskit.JaqalMSGate`) to their QSCOUT counterparts.
+        gate names. If omitted, maps jaqalr
+        (:class:`jaqalpaq.transpilers.qiskit.JaqalRGate`), sx, sxdg, sy
+        (:class:`jaqalpaq.qiskit.SYGate`), sydg (:class:`jaqalpaq.qiskit.SYdgGate`), s,
+        sdg, x, y, z, rz, jaqalms (:class:`jaqalpaq.qiskit.JaqalMSGate`), and sxx
+        (:class:`jaqalpaq.qiskit.SXXGate`) to their QSCOUT counterparts.
     :type names: dict or None
     :param native_gates: The native gate set to target. If None, target the QSCOUT native
         gates.
@@ -232,6 +234,21 @@ def jaqal_circuit_from_qiskit_circuit(
 
 
 def qiskit_circuit_from_jaqal_circuit(circuit, names=None):
+    """
+    Converts a :class:`jaqalpaq.core.Circuit` to a Qiskit circuit. All scheduling
+    information in the circuit will be lost in conversion.
+
+    :param jaqalpaq.core.Circuit circuit: The circuit to convert.
+    :param names: A mapping from names of native Jaqal gates to the corresponding Qiskit
+        gate names. If omitted, maps R (:class:`jaqalpaq.transpilers.qiskit.JaqalRGate`),
+        Sx, Sxd, Sy (:class:`jaqalpaq.qiskit.SYGate`), Syd
+        (:class:`jaqalpaq.qiskit.SYdgGate`), Sz, Szd, Px, Py, Pz, Rz, MS
+        (:class:`jaqalpaq.qiskit.JaqalMSGate`), and Sxx
+        (:class:`jaqalpaq.qiskit.SXXGate`) to their Qiskit counterparts.
+    :type names: dict or None
+    :returns: The same quantum circuit, converted to Qiskit.
+    :rtype: qiskit.circuit.QuantumCircuit
+    """
     if names is None:
         names = {v: k for k, v in _QISKIT_NAMES.items()}
 

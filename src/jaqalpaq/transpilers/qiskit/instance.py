@@ -43,7 +43,7 @@ class IonInstance(QuantumInstance):
             "param_maps": param_maps,
         }
 
-    def transpile(self, circuits):
+    def transpile(self, circuits, pass_manager=None):
         if isinstance(circuits, list):
             ipm = ion_pass_manager()
             return [ipm.run(circuit.decompose()) for circuit in circuits]
