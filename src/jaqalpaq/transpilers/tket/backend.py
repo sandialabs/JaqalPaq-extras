@@ -108,6 +108,9 @@ class JaqalBackend(Backend):
     def backend_info(self) -> BackendInfo:
         return self._backend_info
 
+    def rebase_pass(self) -> BasePass:
+        return self._rebase_pass
+
     def process_circuits(
         self,
         circuits: Sequence[Circuit],

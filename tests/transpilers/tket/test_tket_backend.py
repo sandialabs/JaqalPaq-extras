@@ -8,7 +8,7 @@ from jaqalpaq.transpilers.tket import JaqalBackend
 from pytket import Circuit
 
 
-class PytketTranspilerTester(unittest.TestCase):
+class PytketBackendTester(unittest.TestCase):
     def test_prepare_bell_pairs(self):
         circ = Circuit(2, 2)
         circ.H(1).CX(1, 0).measure_all()
