@@ -28,10 +28,10 @@ from pytket.backends.backendinfo import BackendInfo
 from pytket.backends.resulthandle import _ResultIdTuple
 from pytket.backends.status import StatusEnum
 from pytket.circuit import OpType, Circuit, Bit, Qubit
-from pytket.routing import Architecture
+from pytket.architecture import Architecture
 from pytket.passes import (
     BasePass,
-    RebaseUMD,
+    auto_rebase_pass,
     SynthesiseUMD,
     SequencePass,
     DecomposeBoxes,
@@ -93,7 +93,7 @@ class JaqalBackend(Backend):
 
         self._memory = False
 
-        self._rebase_pass = RebaseUMD()
+        self._rebase_pass = auto_rebase_pass(gate_set)
 
     @property
     def _result_id_type(self) -> _ResultIdTuple:

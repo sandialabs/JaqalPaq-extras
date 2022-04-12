@@ -1,13 +1,19 @@
 # Copyright 2020 National Technology & Engineering Solutions of Sandia, LLC (NTESS).
 # Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains
 # certain rights in this software.
-from pytket.circuit import OpType
+from pytket.circuit import OpType, Circuit, QubitRegister, Bit
 
 from jaqalpaq.core.circuitbuilder import (
     CircuitBuilder,
     UnscheduledBlockBuilder,
     SequentialBlockBuilder,
 )
+
+from jaqalpaq.core import Macro
+
+from jaqalpaq.core.algorithm import expand_subcircuits, expand_macros
+from jaqalpaq.core.algorithm.visitor import Visitor
+from jaqalpaq.core.algorithm.fill_in_map import fill_in_map
 
 import numpy as np
 
@@ -17,6 +23,28 @@ _TKET_NAMES = {
     OpType.PhasedX: lambda q, alpha, beta: ("R", q, beta, alpha),
     OpType.Rz: lambda q, theta: ("Rz", q, theta),
     OpType.XXPhase: lambda q1, q2, theta: ("MS", q1, q2, 0, theta),
+}
+
+_REVERSE_TKET_NAMES = {
+    "R": lambda q, beta, alpha: [(OpType.PhasedX, [alpha, beta], [q])],
+    "Sx": lambda q: [(OpType.SX, [q])],
+    "Sxd": lambda q: [(OpType.SXdg, [q])],
+    "Sy": lambda q: [(OpType.Ry, 0.5, [q])],
+    "Syd": lambda q: [(OpType.Ry, -0.5, [q])],
+    "Sz": lambda q: [(OpType.S, [q])],
+    "Szd": lambda q: [(OpType.Sdg, [q])],
+    "Px": lambda q: [(OpType.X, [q])],
+    "Py": lambda q: [(OpType.Y, [q])],
+    "Pz": lambda q: [(OpType.Z, [q])],
+    "Rz": lambda q, theta: [(OpType.Rz, theta, [q])],
+    "MS": lambda q1, q2, phi, theta: [
+        (OpType.Rz, phi, [q1]),
+        (OpType.Rz, phi, [q2]),
+        (OpType.XXPhase, theta, [q1, q2]),
+        (OpType.Rz, -phi, [q1]),
+        (OpType.Rz, -phi, [q2]),
+    ],
+    "Sxx": lambda q1, q2: [(OpType.XXPhase, 0.5, [q1, q2])],
 }
 
 
@@ -56,7 +84,7 @@ def jaqal_circuit_from_tket_circuit(
         :meth:`jaqalpaq.core.Circuit.build_gate`. If omitted, maps
         ``pytket.OpType.PhasedX`` to the QSCOUT ``R`` gate, ``pytket.OpType.Rz`` to the
         QSCOUT ``Rz`` gate, and ``pytket.OpType.XXPhase`` to the QSCOUT ``MS`` gate. The
-        ``pytket.passes.SynthesizeUMD`` compilation pass will compile a circuit into this
+        ``pytket.passes.SynthesiseUMD`` compilation pass will compile a circuit into this
         basis.
     :type names: dict or None
     :param native_gates: The native gate set to target. If None, target the QSCOUT native
@@ -165,6 +193,8 @@ def convert_command(
             if len(measure_accumulator) == n:
                 block.gate("measure_all")
                 measure_accumulator = set()
+    elif op_type == OpType.Reset and remove_measurements:
+        pass
     elif op_type == OpType.Barrier:
         block = UnscheduledBlockBuilder()
         qsc.expression.append(block.expression)
@@ -213,3 +243,103 @@ def convert_command(
             % op_type
         )
     return block, measure_accumulator
+
+
+def tket_circuit_from_jaqal_circuit(circuit, names=None):
+    """
+    Converts a :class:`jaqalpaq.core.Circuit` to a pytket circuit. All scheduling
+    information in the circuit will be lost in conversion. Loop statements and macros will
+    be unrolled.
+
+    :param jaqalpaq.core.Circuit circuit: The circuit to convert.
+    :param names: A mapping from names of native Jaqal gates to the corresponding pytket
+        gate names. If omitted, maps R, Sx, Sxd, Sz, Szd, Px, Py, Pz, Rz, and Sxx
+        to their pytket counterparts; and Sy, Syd, and MS to equivalent sequences of
+        pytket gates.
+    :type names: dict or None
+    :returns: The same quantum circuit, converted to Qiskit.
+    :rtype: qiskit.circuit.QuantumCircuit
+    """
+    if names is None:
+        names = _REVERSE_TKET_NAMES
+
+    tkr = {
+        reg.name: QubitRegister(name=reg.name, size=reg.size)
+        for reg in circuit.registers.values()
+        if reg.fundamental
+    }
+    expanded_circuit = fill_in_map(expand_subcircuits(expand_macros(circuit)))
+    visitor = TketTranspilationVisitor()
+    visitor.registers = tkr
+    visitor.names = names
+    return visitor.visit(expanded_circuit)
+
+
+class TketTranspilationVisitor(Visitor):
+    registers = {}
+    names = {}
+
+    def visit_default(self, obj, *args, **kwargs):
+        return obj
+
+    def visit_LoopStatement(self, obj, circ):
+        subcirc = Circuit()
+        for qreg in self.registers.values():
+            subcirc.add_q_register(qreg)
+        self.visit(obj.statements, subcirc)
+        for i in range(obj.iterations):
+            circ.append(subcirc)
+        return circ
+        # TODO: This is inefficient, but at the moment I don't have a more efficient approach.
+        # If pytket implements a similar iteration construct, this should definitely be changed to use it.
+
+    def visit_BlockStatement(self, obj, circ):
+        for stmt in obj.statements:
+            self.visit(stmt, circ)
+        return circ
+
+    def visit_Circuit(self, obj, circ=None):
+        circ = Circuit()
+        for qreg in self.registers.values():
+            circ.add_q_register(qreg)
+        return self.visit(obj.body, circ)
+
+    def visit_GateStatement(self, obj, circ):
+        # Note: The code originally checked if a gate was a native gate, macro, or neither,
+        # and raised an exception if neither. This assumes everything not a macro is a native gate.
+        # Note: This could be more elegant with a is_macro method on gates.
+        if isinstance(obj.gate_def, Macro):
+            raise JaqalError("Expand macros before transpilation.")
+        elif obj.name == "prepare_all":
+            for reg in self.registers.values():
+                for qb in reg:
+                    circ.add_gate(OpType.Reset, [qb])
+        elif obj.name == "measure_all":
+            for qreg in self.registers.values():
+                for bit in qreg:
+                    cbit = Bit(len(circ.bits))
+                    circ.add_bit(cbit)
+                    circ.Measure(bit, cbit)
+        else:
+            classical_params = []
+            quantum_params = []
+            for pname, pval in obj.parameters.items():
+                if pname in [
+                    cparam.name for cparam in obj.gate_def.classical_parameters
+                ]:
+                    classical_params.append(self.visit(pval))
+                else:
+                    quantum_params.append(self.visit(pval))
+            [
+                circ.add_gate(*gate_data)
+                for gate_data in self.names[obj.name](
+                    *quantum_params, *classical_params
+                )
+            ]
+
+    def visit_Parameter(self, obj):
+        return self.visit(obj.resolve_value())
+
+    def visit_NamedQubit(self, obj):
+        reg, idx = obj.resolve_qubit()
+        return self.registers[reg.name][idx]
