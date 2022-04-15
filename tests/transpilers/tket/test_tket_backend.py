@@ -13,7 +13,7 @@ class PytketBackendTester(unittest.TestCase):
         circ = Circuit(2, 2)
         circ.H(1).CX(1, 0).measure_all()
         jb = JaqalBackend("emulator")
-        jb.compile_circuit(circ)
-        handle = jb.process_circuit(circ, n_shots=16)
+        compiled = jb.get_compiled_circuit(circ)
+        handle = jb.process_circuit(compiled, n_shots=16)
         for shot in jb.get_result(handle).get_shots():
             self.assertEqual(shot[0], shot[1])
