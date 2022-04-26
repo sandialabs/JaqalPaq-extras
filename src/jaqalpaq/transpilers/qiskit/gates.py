@@ -75,6 +75,7 @@ class JaqalMSGate(Gate):
         q = QuantumRegister(2, "q")
         qc = QuantumCircuit(q, name=self.name)
         phi, theta = tuple(self.params)
+        # In IBM basis gates this expands to:
         #         rule = [
         #             (U3Gate(0, 0, phi), [q[0]], []),
         #             (U3Gate(0, 0, phi+pi/2), [q[1]], []),
@@ -87,6 +88,7 @@ class JaqalMSGate(Gate):
         #             (U3Gate(0, 0, -phi-pi/2), [q[0]], []),
         #             (U3Gate(0, 0, -phi), [q[1]], []),
         #         ]
+        # But we expand it to ion basis gates as:
         rule = [
             (U3Gate(0, 0, phi), [q[0]], []),
             (U3Gate(0, 0, phi), [q[1]], []),
@@ -150,18 +152,18 @@ class SXXGate(Gate):
         """
         q = QuantumRegister(2, "q")
         qc = QuantumCircuit(q, name=self.name)
+        # In IBM basis gates this expands to:
         #         rule = [
-        #             (U3Gate(0, 0, phi), [q[0]], []),
-        #             (U3Gate(0, 0, phi+pi/2), [q[1]], []),
+        #             (U3Gate(0, 0, pi/2), [q[1]], []),
         #             (CnotGate(), [q[1], q[0]], []),
         #             (U3Gate(0, 0, -pi/2), [q[0]], []),
-        #             (U3Gate(theta+pi/2,0,0), [q[1]], []),
+        #             (U3Gate(pi,0,0), [q[1]], []),
         #             (CnotGate(), [q[0], q[1]], []),
         #             (U3Gate(-pi/2,0,0), [q[1]], []),
         #             (CnotGate(), [q[1], q[0]], []),
-        #             (U3Gate(0, 0, -phi-pi/2), [q[0]], []),
-        #             (U3Gate(0, 0, -phi), [q[1]], []),
+        #             (U3Gate(0, 0, -pi/2), [q[0]], []),
         #         ]
+        # But we expand it to ion basis gates as:
         rule = [
             (RXXGate(pi / 2), [q[0], q[1]], []),
         ]
