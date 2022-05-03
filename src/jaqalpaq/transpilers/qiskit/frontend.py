@@ -338,26 +338,26 @@ def ion_equivalence_library():
 
     circuit = QuantumCircuit(q1, global_phase=theta / 2)
     circuit.rz(theta, 0)
-    el.add_equivalence(PhaseGate(theta), circuit)
+    el.set_entry(PhaseGate(theta), [circuit])
 
     circuit = QuantumCircuit(q1)
     circuit.jaqalr(phi, theta, 0)
-    el.add_equivalence(RGate(theta, phi), circuit)
+    el.set_entry(RGate(theta, phi), [circuit])
 
     circuit = QuantumCircuit(q1)
     circuit.rz(lam, 0)
     circuit.jaqalr(pi / 2, theta, 0)
     circuit.rz(phi, 0)
-    el.add_equivalence(UGate(theta, phi, lam), circuit)
+    el.set_entry(UGate(theta, phi, lam), [circuit])
 
     circuit = QuantumCircuit(q1)
     circuit.z(0)
     circuit.sy(0)
-    el.add_equivalence(HGate(), circuit)
+    el.set_entry(HGate(), [circuit])
 
     circuit = QuantumCircuit(q2)
     circuit.jaqalms(0, theta, 0, 1)
-    el.add_equivalence(RXXGate(theta), circuit)
+    el.set_entry(RXXGate(theta), [circuit])
 
     # // controlled-NOT as per Maslov (2017); this implementation takes s = v = +1
     # gate cx a,b
@@ -374,7 +374,7 @@ def ion_equivalence_library():
     circuit.sxdg(0)
     circuit.sxdg(1)
     circuit.sydg(0)
-    el.add_equivalence(CXGate(), circuit)
+    el.set_entry(CXGate(), [circuit])
 
     return el
 
