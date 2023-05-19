@@ -49,7 +49,7 @@ from pytket.predicates import (
 from jaqalpaq.error import JaqalError
 from jaqalpaq.emulator import UnitarySerializedEmulator, run_jaqal_circuit
 from jaqalpaq.emulator.backend import AbstractBackend
-from jaqalpaq.core.result import ExecutionResult, ProbabilisticSubcircuit
+from jaqalpaq.run.result import ExecutionResult
 from .frontend import _TKET_NAMES, jaqal_circuit_from_tket_circuit
 
 extension_version = "1.0"
@@ -193,7 +193,7 @@ class JaqalBackend(Backend):
             shots = OutcomeArray.from_readouts(
                 [[int(bit) for shot in result.readouts for bit in shot.as_str]]
             )
-        elif isinstance(result.subcircuits[0], ProbabilisticSubcircuit):
+        elif result.subcircuits[0]._subcircuit.simulated:
             rng = default_rng()
 
             def _generate_outcome(probs):
